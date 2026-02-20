@@ -1,0 +1,23 @@
+.onboard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 47, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+.onboard-card {
+  background: #fff;
+  padding: 20px 22px;
+  border-radius: 10px;
+  width: 92%;
+  max-width: 520px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.25);
+}
+.onboard-card h2 { margin: 0 0 8px; color: #0b5ed7 }
+.onboard-card p { margin: 0 0 18px; color: #243447 }
+.onboard-controls { display:flex; justify-content:space-between; gap:12px; align-items:center }
+.btn-primary { background:#0b5ed7; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer }
+.btn-secondary { background:transparent; color:#0b5ed7; border:1px solid #cfe0ff; padding:8px 12px; border-radius:6px; cursor:pointer }
+.btn-link { background:transparent; color:#6c757d; border:none; padding:8px 10px; cursor:pointer }

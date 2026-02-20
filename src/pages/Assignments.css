@@ -1,0 +1,79 @@
+.coming-soon-container {
+  min-height: 64vh;
+  margin: 1rem 1.2rem 0;
+  padding: 2.6rem 1.5rem;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 22px;
+  background: linear-gradient(140deg, #2563eb, #06b6d4);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--soft-shadow);
+}
+
+.coming-soon-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.coming-soon-title {
+  margin: 0;
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.coming-soon-text {
+  margin: 1rem 0 0;
+  max-width: 760px;
+  font-size: clamp(0.98rem, 1.7vw, 1.15rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.notification-button {
+  margin-top: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  padding: 0.78rem 1.25rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: transform 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+
+.notification-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.2);
+  color: #1d4ed8;
+  background: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .coming-soon-container {
+    margin: 0.8rem 0.9rem 0;
+    min-height: 58vh;
+    padding: 2rem 1rem;
+  }
+
+  .coming-soon-title {
+    font-size: 2rem;
+  }
+
+  .coming-soon-text {
+    font-size: 1rem;
+  }
+}

@@ -1,0 +1,88 @@
+.skeleton-grid {
+  margin: 12px 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.skeleton-grid.cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.skeleton-grid.cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.skeleton-card {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 26px 22px 28px 20px;
+  background: linear-gradient(175deg, #ffffff, #f0fdf4);
+  padding: 12px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.skeleton-thumb,
+.skeleton-line {
+  border-radius: 12px;
+  background-image: linear-gradient(
+    95deg,
+    rgba(226, 232, 240, 0.75) 15%,
+    rgba(248, 250, 252, 1) 45%,
+    rgba(220, 252, 231, 0.7) 70%,
+    rgba(226, 232, 240, 0.75) 95%
+  );
+  background-size: 220% 100%;
+  animation: smooth-shimmer 1.5s linear infinite;
+}
+
+.skeleton-thumb {
+  width: 96px;
+  height: 60px;
+  flex: 0 0 auto;
+}
+
+.skeleton-body {
+  flex: 1;
+}
+
+.skeleton-line {
+  height: 10px;
+  margin-bottom: 8px;
+}
+
+.skeleton-line.short {
+  width: 42%;
+  height: 12px;
+}
+
+.skeleton-line.medium {
+  width: 74%;
+}
+
+.skeleton-line.long {
+  width: 92%;
+}
+
+@keyframes smooth-shimmer {
+  0% {
+    background-position: -220% 0;
+  }
+  100% {
+    background-position: 220% 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+}

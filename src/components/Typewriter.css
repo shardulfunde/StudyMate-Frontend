@@ -1,0 +1,28 @@
+.typewriter {
+  font-weight: 700;
+  color: inherit; /* inherit from parent (works on dark/light hero) */
+}
+
+.typewriter-text {
+  white-space: pre;
+  color: var(--accent-2);
+  opacity: 0.98;
+  font-weight: 700;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  margin-left: 6px;
+  color: var(--accent-2); /* show accent cursor */
+  opacity: 1;
+}
+
+.typewriter-cursor.blink {
+  opacity: 0.18;
+}
+
+.typewriter-suffix {
+  margin-left: 8px;
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
+}
