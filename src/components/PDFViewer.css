@@ -21,13 +21,31 @@
 .pdf-modal {
   background: white;
   width: 100%;
-  max-width: 900px;
-  height: 90%;
+  max-width: min(1500px, 96vw);
+  height: min(94vh, 1100px);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   animation: slideUp 0.3s ease-out;
+}
+
+.pdf-modal-fullscreen {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+}
+
+.pdf-modal:fullscreen,
+.pdf-modal:-webkit-full-screen {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+  overflow: hidden;
 }
 
 .pdf-header {
@@ -40,6 +58,12 @@
   border-radius: 8px 8px 0 0;
 }
 
+.pdf-modal-fullscreen .pdf-header {
+  background: #020617;
+  border-bottom: 1px solid #0f172a;
+  border-radius: 0;
+}
+
 .pdf-title {
   font-weight: 600;
   color: #333;
@@ -48,10 +72,30 @@
   text-overflow: ellipsis;
 }
 
+.pdf-modal-fullscreen .pdf-title {
+  color: #e2e8f0;
+}
+
 .pdf-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.pdf-open-tab-btn {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pdf-open-tab-btn:hover {
+  background: #f8fafc;
 }
 
 .pdf-generate-test-btn {
@@ -67,6 +111,40 @@
 
 .pdf-generate-test-btn:hover {
   background: #f1f5f9;
+}
+
+.pdf-generate-test-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pdf-fullscreen-btn {
+  border: 1px solid #cbd5e1;
+  background: #eef2ff;
+  color: #1e3a8a;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pdf-fullscreen-btn:hover {
+  background: #e0e7ff;
+}
+
+.pdf-modal-fullscreen .pdf-open-tab-btn,
+.pdf-modal-fullscreen .pdf-generate-test-btn,
+.pdf-modal-fullscreen .pdf-fullscreen-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.pdf-modal-fullscreen .pdf-open-tab-btn:hover,
+.pdf-modal-fullscreen .pdf-generate-test-btn:hover,
+.pdf-modal-fullscreen .pdf-fullscreen-btn:hover {
+  background: #1e293b;
 }
 
 .pdf-close-btn {
@@ -90,10 +168,25 @@
   overflow: hidden;
 }
 
+.pdf-modal-fullscreen .pdf-content {
+  background: #000;
+}
+
+.pdf-modal:fullscreen .pdf-content,
+.pdf-modal:-webkit-full-screen .pdf-content {
+  background: #000;
+}
+
 .pdf-frame {
   width: 100%;
   height: 100%;
   display: block;
+  background: #000;
+}
+
+.pdf-modal:fullscreen .pdf-frame,
+.pdf-modal:-webkit-full-screen .pdf-frame {
+  background: #000;
 }
 
 .pdf-test-modal-overlay {

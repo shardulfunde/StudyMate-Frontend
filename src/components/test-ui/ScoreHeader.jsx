@@ -20,9 +20,14 @@ export default function ScoreHeader({
   testType = 'mcq',
   paperMode = false
 }) {
-  const scoreText = testType === 'theory'
-    ? `${score.awardedMarks}/${score.totalMarks} (${score.percent}%)`
-    : `${score.correct}/${score.total} (${score.percent}%)`;
+  const isTheory = testType === 'theory';
+  const theoryReady = Number(score.totalMarks) > 0 && !aiBusy;
+  const scoreText = isTheory
+    ? (theoryReady ? `${score.awardedMarks}/${score.totalMarks}` : 'Checking...')
+    : `${score.correct}/${score.total}`;
+  const scoreSubText = isTheory
+    ? (theoryReady ? `${score.percent}%` : 'Evaluation')
+    : `${score.percent}%`;
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur md:px-6">
@@ -59,8 +64,12 @@ export default function ScoreHeader({
           </div>
 
           {submitted && score && (
-            <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-              {scoreText}
+            <div className="grid h-16 w-16 place-items-center rounded-full border-2 border-emerald-300 bg-emerald-50 text-center text-emerald-700 shadow-sm">
+              <div>
+                <p className="text-[9px] font-semibold uppercase leading-none tracking-wide">Result</p>
+                <p className="text-xs font-bold leading-tight">{scoreText}</p>
+                <p className="text-[9px] font-semibold leading-none">{scoreSubText}</p>
+              </div>
             </div>
           )}
         </div>

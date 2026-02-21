@@ -8,6 +8,8 @@ import {
 import { useToast } from '../../context/ToastContext';
 
 const TestContext = createContext(null);
+export const MIN_QUESTIONS = 1;
+export const MAX_QUESTIONS = 15;
 
 const DEFAULT_CONFIG = {
   testType: 'mcq',
@@ -36,6 +38,12 @@ function getCorrectAnswerIndex(question) {
 
 function getInitialTimer(questionCount) {
   return Math.max(5, Number(questionCount) || 10) * 60;
+}
+
+function clampQuestionCount(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 10;
+  return Math.min(MAX_QUESTIONS, Math.max(MIN_QUESTIONS, Math.trunc(parsed)));
 }
 
 function resolveQuestions(testResult, testType) {
@@ -126,7 +134,7 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
     setUi((prev) => ({
       ...prev,
       confirmOpen: true,
-      submitWarning: 'Timer finished. Submit now to view score and analysis.'
+      submitWarning: 'Timer finished. Submit now to view your result screen.'
     }));
   }, [submitted, testResult, timerSeconds]);
 
@@ -146,7 +154,7 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
     const payload = {
       scope_type: scopeType,
       scope_id: String(scopeId),
-      number_of_questions: Number(testConfig.numberOfQuestions) || 10,
+      number_of_questions: clampQuestionCount(testConfig.numberOfQuestions),
       difficulty: testConfig.difficulty,
       language: testConfig.language
     };
@@ -268,8 +276,38 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
     }));
   }, [questions]);
 
-  const confirmSubmit = useCallback(() => {
+  const fetchAnalysisForSubmission = useCallback(async (submittedType, submittedResult) => {
+    if (!submittedResult) return;
+
+    setAnalysis({ data: null, loading: true, error: '', visible: true });
+
+    try {
+      const response = submittedType === 'theory'
+        ? await analyzeTheoryTestAxios({
+            theory_test: submittedResult,
+            student_answer: buildTheoryStudentAnswers()
+          })
+        : await analyzeTestAxios({
+            test: submittedResult,
+            student_answer: buildMcqStudentAnswers()
+          });
+
+      setAnalysis({ data: response, loading: false, error: '', visible: true });
+
+      if (submittedType === 'theory') {
+        updateTheoryScoreFromAnalysis(response);
+      }
+    } catch (error) {
+      const message = error?.detail?.detail || error?.message || 'Failed to load analysis';
+      setAnalysis({ data: null, loading: false, error: message, visible: true });
+      showToast(message, 'error');
+    }
+  }, [buildMcqStudentAnswers, buildTheoryStudentAnswers, showToast, updateTheoryScoreFromAnalysis]);
+
+  const confirmSubmit = useCallback(async () => {
     if (!questions.length) return;
+    const submittedType = isTheoryTest ? 'theory' : 'mcq';
+    const submittedResult = testResult;
 
     if (isTheoryTest) {
       const totalMarks = questions.reduce((sum, question) => sum + (Number(question?.marks) || 0), 0);
@@ -301,57 +339,29 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
 
     setSubmitted(true);
     setUi((prev) => ({ ...prev, confirmOpen: false, submitWarning: '' }));
-  }, [answers, isTheoryTest, questions]);
+    await fetchAnalysisForSubmission(submittedType, submittedResult);
+  }, [answers, fetchAnalysisForSubmission, isTheoryTest, questions, testResult]);
 
   const showAnalysis = useCallback(async () => {
     if (!submitted || !testResult) return;
-    if (analysis.loading) return;
 
     if (analysis.visible) {
       setAnalysis((prev) => ({ ...prev, visible: false }));
       return;
     }
 
-    if (analysis.data) {
+    if (analysis.loading) {
       setAnalysis((prev) => ({ ...prev, visible: true }));
       return;
     }
 
-    setAnalysis((prev) => ({ ...prev, visible: true, loading: true, error: '' }));
-
-    try {
-      const response = isTheoryTest
-        ? await analyzeTheoryTestAxios({
-            theory_test: testResult,
-            student_answer: buildTheoryStudentAnswers()
-          })
-        : await analyzeTestAxios({
-            test: testResult,
-            student_answer: buildMcqStudentAnswers()
-          });
-
-      setAnalysis({ data: response, loading: false, error: '', visible: true });
-
-      if (isTheoryTest) {
-        updateTheoryScoreFromAnalysis(response);
-      }
-    } catch (error) {
-      const message = error?.detail?.detail || error?.message || 'Failed to load analysis';
-      setAnalysis({ data: null, loading: false, error: message, visible: true });
-      showToast(message, 'error');
+    if (analysis.data || analysis.error) {
+      setAnalysis((prev) => ({ ...prev, visible: true }));
+      return;
     }
-  }, [
-    analysis.data,
-    analysis.loading,
-    analysis.visible,
-    buildMcqStudentAnswers,
-    buildTheoryStudentAnswers,
-    isTheoryTest,
-    showToast,
-    submitted,
-    testResult,
-    updateTheoryScoreFromAnalysis
-  ]);
+
+    await fetchAnalysisForSubmission(isTheoryTest ? 'theory' : 'mcq', testResult);
+  }, [analysis.data, analysis.error, analysis.loading, fetchAnalysisForSubmission, isTheoryTest, submitted, testResult]);
 
   const toggleSidebarMobile = useCallback(() => {
     setUi((prev) => ({ ...prev, sidebarOpenMobile: !prev.sidebarOpenMobile }));

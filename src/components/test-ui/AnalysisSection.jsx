@@ -8,12 +8,12 @@ function safeList(value) {
 
 export default function AnalysisSection({ analysis, loading, error }) {
   if (loading) {
-    return <AIThinkingState title="AI thinking..." subtitle="Generating actionable insights from your test performance." />;
+    return <AIThinkingState title="Checking your answers..." subtitle="Preparing score, feedback, and next-step recommendations." />;
   }
 
   if (error) {
     return (
-      <section className="animate-fadeInUp rounded-xl border border-red-200 bg-red-50 p-4">
+      <section className="animate-fadeInUp rounded-lg border border-red-200 bg-red-50 p-3">
         <p className="text-sm font-medium text-red-700">{error}</p>
       </section>
     );
@@ -27,28 +27,28 @@ export default function AnalysisSection({ analysis, loading, error }) {
     const evaluations = safeList(analysis.question_evaluations);
 
     return (
-      <section className="animate-slideDown overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-smcard">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-xl font-semibold text-slate-800">Theory Analysis</h3>
+      <section className="animate-slideDown overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-lg font-semibold text-slate-800">Theory Evaluation</h3>
           <AILabel label="AI Insights" active />
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Overall Feedback</h4>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-1.5 text-sm leading-6 text-slate-600">
               {analysis.overall_analysis || 'No overall analysis available.'}
             </p>
           </div>
 
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Question-wise Evaluation</h4>
-            <div className="mt-2 space-y-3">
+            <div className="mt-2 space-y-2.5">
               {evaluations.length === 0 && (
                 <p className="text-sm text-slate-600">No question-wise evaluation available.</p>
               )}
               {evaluations.map((item, index) => (
-                <article key={`${item.question_index}-${index}`} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <article key={`${item.question_index}-${index}`} className="rounded-md border border-slate-200 bg-slate-50 p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-slate-700">Question {Number(item.question_index) + 1}</p>
                     <span className="rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
@@ -72,13 +72,13 @@ export default function AnalysisSection({ analysis, loading, error }) {
   const plan = safeList(analysis.detailed_plan_to_improve);
 
   return (
-    <section className="animate-slideDown overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-smcard">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-xl font-semibold text-slate-800">Test Analysis</h3>
+    <section className="animate-slideDown overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-lg font-semibold text-slate-800">Performance Review</h3>
         <AILabel label="AI Insights" active />
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-slate-600">
           {analysis.topic || 'Unknown topic'}
         </span>
@@ -87,10 +87,10 @@ export default function AnalysisSection({ analysis, loading, error }) {
         </span>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Performance</h4>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{description || 'No description available.'}</p>
+          <p className="mt-1.5 text-sm leading-6 text-slate-600">{description || 'No description available.'}</p>
         </div>
 
         <div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import './Notes.css';
 import Skeleton from '../components/Skeleton';
@@ -23,6 +23,8 @@ export default function Notes() {
   const [selectedYear, setSelectedYear] = useState(null);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [shareFeedbackId, setShareFeedbackId] = useState(null);
 
   const [yearNumber, setYearNumber] = useState('');
   const [creatingYear, setCreatingYear] = useState(false);
@@ -59,6 +61,108 @@ export default function Notes() {
       .catch(() => setSubjects([]));
   }, []);
 
+  useEffect(() => {
+    const stepParam = searchParams.get('step');
+    const programIdParam = searchParams.get('programId');
+    const yearIdParam = searchParams.get('yearId');
+
+    const targetProgram = programIdParam
+      ? programs.find((program) => String(program.id) === String(programIdParam))
+      : null;
+    if (targetProgram && String(selectedProgram?.id) !== String(targetProgram.id)) {
+      setSelectedProgram(targetProgram);
+    }
+    if (!programIdParam && selectedProgram) {
+      setSelectedProgram(null);
+    }
+
+    const targetYear = yearIdParam
+      ? years.find((year) => String(year.id) === String(yearIdParam))
+      : null;
+    if (targetYear && String(selectedYear?.id) !== String(targetYear.id)) {
+      setSelectedYear(targetYear);
+    }
+    if (!yearIdParam && selectedYear) {
+      setSelectedYear(null);
+    }
+
+    const targetStep =
+      stepParam === 'subject' ? STEP.SUBJECT
+        : stepParam === 'year' ? STEP.YEAR
+          : STEP.PROGRAM;
+    if (step !== targetStep) {
+      setStep(targetStep);
+    }
+  }, [programs, years, searchParams, selectedProgram, selectedYear, step]);
+
+  const updateNavState = useCallback((next) => {
+    const params = new URLSearchParams(searchParams);
+    const entries = Object.entries(next);
+    entries.forEach(([key, value]) => {
+      if (value === null || value === undefined || value === '') params.delete(key);
+      else params.set(key, String(value));
+    });
+    setSearchParams(params);
+  }, [searchParams, setSearchParams]);
+
+  const copySubjectShareLink = useCallback(async (subjectId, type) => {
+    const url = new URL(`${window.location.origin}/subject/${subjectId}`);
+    url.searchParams.set('type', type);
+    if (selectedProgram?.id) url.searchParams.set('programId', selectedProgram.id);
+    if (selectedYear?.id) url.searchParams.set('yearId', selectedYear.id);
+
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setShareFeedbackId(subjectId);
+      setTimeout(() => setShareFeedbackId(null), 1200);
+    } catch {
+      window.prompt('Copy this subject link:', url.toString());
+    }
+  }, [selectedProgram?.id, selectedYear?.id]);
+
+  const copyLink = useCallback(async (url, key, fallbackLabel) => {
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setShareFeedbackId(key);
+      setTimeout(() => setShareFeedbackId(null), 1200);
+    } catch {
+      window.prompt(`Copy this ${fallbackLabel} link:`, url.toString());
+    }
+  }, []);
+
+  const copyProgramShareLink = useCallback((programId) => {
+    const url = new URL(`${window.location.origin}/notes`);
+    url.searchParams.set('step', 'year');
+    url.searchParams.set('programId', programId);
+    copyLink(url, `program-${programId}`, 'program');
+  }, [copyLink]);
+
+  const copyYearShareLink = useCallback((programId, yearId) => {
+    const url = new URL(`${window.location.origin}/notes`);
+    url.searchParams.set('step', 'subject');
+    url.searchParams.set('programId', programId);
+    url.searchParams.set('yearId', yearId);
+    copyLink(url, `year-${yearId}`, 'year');
+  }, [copyLink]);
+
+  const copyCurrentViewShareLink = useCallback(() => {
+    const url = new URL(`${window.location.origin}/notes`);
+    if (step === STEP.YEAR && selectedProgram?.id) {
+      url.searchParams.set('step', 'year');
+      url.searchParams.set('programId', selectedProgram.id);
+      copyLink(url, 'view-current', 'current view');
+      return;
+    }
+    if (step === STEP.SUBJECT && selectedProgram?.id && selectedYear?.id) {
+      url.searchParams.set('step', 'subject');
+      url.searchParams.set('programId', selectedProgram.id);
+      url.searchParams.set('yearId', selectedYear.id);
+      copyLink(url, 'view-current', 'current view');
+      return;
+    }
+    copyLink(url, 'view-current', 'notes');
+  }, [copyLink, selectedProgram?.id, selectedYear?.id, step]);
+
   const handleSelectProgram = (program) => {
     setSelectedProgram(program);
     setSelectedYear(null);
@@ -66,12 +170,21 @@ export default function Notes() {
     setSearch('');
     setYearNumber('');
     setYearActionMessage(null);
+    updateNavState({
+      step: 'year',
+      programId: program.id,
+      yearId: null
+    });
   };
 
   const handleSelectYear = (year) => {
     setSelectedYear(year);
     setStep(STEP.SUBJECT);
     setSearch('');
+    updateNavState({
+      step: 'subject',
+      yearId: year.id
+    });
   };
 
   const handleBackToPrograms = () => {
@@ -80,11 +193,20 @@ export default function Notes() {
     setSelectedYear(null);
     setYearNumber('');
     setYearActionMessage(null);
+    updateNavState({
+      step: null,
+      programId: null,
+      yearId: null
+    });
   };
 
   const handleBackToYears = () => {
     setStep(STEP.YEAR);
     setSelectedYear(null);
+    updateNavState({
+      step: 'year',
+      yearId: null
+    });
   };
 
   const canCreateYearForSelectedProgram = Boolean(
@@ -152,7 +274,7 @@ export default function Notes() {
             <button
               type="button"
               className="breadcrumb-item"
-              onClick={() => setStep(STEP.YEAR)}
+              onClick={handleBackToYears}
               disabled={step === STEP.PROGRAM}
             >
               {selectedProgram.name}
@@ -171,23 +293,48 @@ export default function Notes() {
 
       {step === STEP.PROGRAM && (
         <div className="notes-step">
-          <h2 className="step-title">Select Program</h2>
+          <div className="step-title-row">
+            <h2 className="step-title">Select Program</h2>
+            <button
+              type="button"
+              className="step-share-btn"
+              onClick={copyCurrentViewShareLink}
+              title={shareFeedbackId === 'view-current' ? 'Copied' : 'Share this view'}
+              aria-label="Share this view"
+            >
+              {shareFeedbackId === 'view-current' ? 'Copied' : '\u{1F517}'}
+            </button>
+          </div>
           {loading && <Skeleton cardCount={6} columns={3} />}
           {!loading && programs.length === 0 && (
             <p className="page-msg">No programs found.</p>
           )}
           <div className="cards-grid">
             {programs.map((p, i) => (
-              <button
-                key={p.id}
-                type="button"
-                className="subject-card selectable"
-                onClick={() => handleSelectProgram(p)}
-              >
-                <div className="subject-icon">{PROGRAM_ICONS[i % PROGRAM_ICONS.length]}</div>
-                <h2 className="subject-title">{p.name}</h2>
-                <p className="subject-description">View years and subjects</p>
-              </button>
+              <div key={p.id} className="subject-card-wrap">
+                <button
+                  type="button"
+                  className="subject-card selectable"
+                  onClick={() => handleSelectProgram(p)}
+                >
+                  <div className="subject-icon">{PROGRAM_ICONS[i % PROGRAM_ICONS.length]}</div>
+                  <h2 className="subject-title">{p.name}</h2>
+                  <p className="subject-description">View years and subjects</p>
+                </button>
+                <button
+                  type="button"
+                  className="subject-share-btn icon-only"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    copyProgramShareLink(p.id);
+                  }}
+                  title={shareFeedbackId === `program-${p.id}` ? 'Copied' : 'Share program'}
+                  aria-label="Share program"
+                >
+                  {shareFeedbackId === `program-${p.id}` ? '✓' : '\u{1F517}'}
+                </button>
+              </div>
             ))}
           </div>
         </div>
@@ -195,7 +342,18 @@ export default function Notes() {
 
       {step === STEP.YEAR && (
         <div className="notes-step">
-          <h2 className="step-title">Select Year - {selectedProgram?.name}</h2>
+          <div className="step-title-row">
+            <h2 className="step-title">Select Year - {selectedProgram?.name}</h2>
+            <button
+              type="button"
+              className="step-share-btn"
+              onClick={copyCurrentViewShareLink}
+              title={shareFeedbackId === 'view-current' ? 'Copied' : 'Share this view'}
+              aria-label="Share this view"
+            >
+              {shareFeedbackId === 'view-current' ? 'Copied' : '\u{1F517}'}
+            </button>
+          </div>
 
           {canCreateYearForSelectedProgram && (
             <form className="notes-create-year-form" onSubmit={handleCreateYear}>
@@ -231,16 +389,30 @@ export default function Notes() {
           )}
           <div className="cards-grid">
             {years.map((y, i) => (
-              <button
-                key={y.id}
-                type="button"
-                className="subject-card selectable"
-                onClick={() => handleSelectYear(y)}
-              >
-                <div className="subject-icon">{YEAR_ICONS[i % YEAR_ICONS.length]}</div>
-                <h2 className="subject-title">Year {y.year_number}</h2>
-                <p className="subject-description">{y.program_name}</p>
-              </button>
+              <div key={y.id} className="subject-card-wrap">
+                <button
+                  type="button"
+                  className="subject-card selectable"
+                  onClick={() => handleSelectYear(y)}
+                >
+                  <div className="subject-icon">{YEAR_ICONS[i % YEAR_ICONS.length]}</div>
+                  <h2 className="subject-title">Year {y.year_number}</h2>
+                  <p className="subject-description">{y.program_name}</p>
+                </button>
+                <button
+                  type="button"
+                  className="subject-share-btn icon-only"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    copyYearShareLink(selectedProgram?.id, y.id);
+                  }}
+                  title={shareFeedbackId === `year-${y.id}` ? 'Copied' : 'Share year'}
+                  aria-label="Share year"
+                >
+                  {shareFeedbackId === `year-${y.id}` ? '✓' : '\u{1F517}'}
+                </button>
+              </div>
             ))}
           </div>
         </div>
@@ -248,9 +420,20 @@ export default function Notes() {
 
       {step === STEP.SUBJECT && (
         <div className="notes-step">
-          <h2 className="step-title">
-            Select Subject - Year {selectedYear?.year_number} - {selectedProgram?.name}
-          </h2>
+          <div className="step-title-row">
+            <h2 className="step-title">
+              Select Subject - Year {selectedYear?.year_number} - {selectedProgram?.name}
+            </h2>
+            <button
+              type="button"
+              className="step-share-btn"
+              onClick={copyCurrentViewShareLink}
+              title={shareFeedbackId === 'view-current' ? 'Copied' : 'Share this view'}
+              aria-label="Share this view"
+            >
+              {shareFeedbackId === 'view-current' ? 'Copied' : '\u{1F517}'}
+            </button>
+          </div>
           <div className="search-container">
             <input
               type="text"
@@ -267,11 +450,23 @@ export default function Notes() {
           )}
           <div className="cards-grid">
             {filteredSubjects.map((s, i) => (
-              <Link key={s.id} to={`/subject/${s.id}?type=notes`} className="subject-card">
-                <div className="subject-icon">{SUBJECT_ICONS[i % SUBJECT_ICONS.length]}</div>
-                <h2 className="subject-title">{s.subject}</h2>
-                <p className="subject-description">View notes and resources</p>
-              </Link>
+              <div key={s.id} className="subject-card-wrap">
+                <Link
+                  to={`/subject/${s.id}?type=notes&programId=${encodeURIComponent(selectedProgram?.id || '')}&yearId=${encodeURIComponent(selectedYear?.id || '')}`}
+                  className="subject-card"
+                >
+                  <div className="subject-icon">{SUBJECT_ICONS[i % SUBJECT_ICONS.length]}</div>
+                  <h2 className="subject-title">{s.subject}</h2>
+                  <p className="subject-description">View notes and resources</p>
+                </Link>
+                <button
+                  type="button"
+                  className="subject-share-btn icon-only"
+                  onClick={() => copySubjectShareLink(s.id, 'notes')}
+                >
+                  {shareFeedbackId === s.id ? '✓' : '\u{1F517}'}
+                </button>
+              </div>
             ))}
           </div>
         </div>

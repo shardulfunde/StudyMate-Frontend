@@ -4,6 +4,14 @@ import PDFViewer from './PDFViewer';
 import TestContainer from './test-ui/TestContainer';
 import './ResourceCard.css';
 
+const RESOURCE_ICONS = ['📘', '📗', '📙', '📕', '🗂️', '🧾', '📝', '📄'];
+
+function pickResourceIcon(seed = '') {
+  const str = String(seed || '');
+  const hash = [...str].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return RESOURCE_ICONS[hash % RESOURCE_ICONS.length];
+}
+
 export default function ResourceCard({
   resource,
   canManageActions = false,
@@ -116,6 +124,7 @@ export default function ResourceCard({
         day: 'numeric'
       })
     : '';
+  const resourceIcon = pickResourceIcon(resource.title || resource.id);
 
   return (
     <>
@@ -162,7 +171,10 @@ export default function ResourceCard({
           )}
         </div>
 
-        <h3 className="resource-card-title">{resource.title}</h3>
+        <div className="resource-card-title-row">
+          <span className="resource-card-icon" aria-hidden="true">{resourceIcon}</span>
+          <h3 className="resource-card-title">{resource.title}</h3>
+        </div>
         <p className="resource-card-meta">
           {resource.uploaded_by && <span>By {resource.uploaded_by.split('@')[0]}</span>}
           <br />
@@ -233,6 +245,7 @@ export default function ResourceCard({
           url={viewUrl}
           mode={mode}
           title={resource.title}
+          embeddingStatus={resource.embedding_status}
           onClose={() => setViewUrl(null)}
         />
       )}

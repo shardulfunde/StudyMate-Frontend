@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { TestProvider, useTestContext } from './TestContext';
+import { MAX_QUESTIONS, MIN_QUESTIONS, TestProvider, useTestContext } from './TestContext';
 import ScoreHeader from './ScoreHeader';
 import QuestionCard from './QuestionCard';
 import TheoryQuestionCard from './TheoryQuestionCard';
@@ -30,20 +30,23 @@ function StartForm() {
       onSubmit={onSubmit}
     >
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-slate-800">Start Test</h3>
+        <h3 className="text-lg font-semibold text-slate-800">Create Your Test</h3>
         <AILabel label="AI Powered" active={false} />
       </div>
+      <p className="text-sm text-slate-600">
+        Pick your format and preferences. After submission, your score and evaluation will appear automatically.
+      </p>
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-1 text-sm text-slate-600">
-          <span>Test Type</span>
+          <span>Question Format</span>
           <select
             value={testConfig.testType}
             onChange={(event) => setField('testType', event.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           >
-            <option value="mcq">MCQ</option>
-            <option value="theory">Theory</option>
+            <option value="mcq">MCQ (choose one option)</option>
+            <option value="theory">Theory (write full answers)</option>
           </select>
         </label>
 
@@ -51,12 +54,15 @@ function StartForm() {
           <span>Questions</span>
           <input
             type="number"
-            min="1"
-            max="50"
+            min={MIN_QUESTIONS}
+            max={MAX_QUESTIONS}
             value={testConfig.numberOfQuestions}
             onChange={(event) => setField('numberOfQuestions', event.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
+          <span className="text-xs text-slate-500">
+            Enter any value. We automatically keep it between {MIN_QUESTIONS} and {MAX_QUESTIONS}.
+          </span>
         </label>
 
         <label className="space-y-1 text-sm text-slate-600">
@@ -66,9 +72,9 @@ function StartForm() {
             onChange={(event) => setField('difficulty', event.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           >
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
+            <option value="easy">Easy (quick revision)</option>
+            <option value="medium">Medium (balanced)</option>
+            <option value="hard">Hard (challenge)</option>
           </select>
         </label>
 
@@ -83,26 +89,26 @@ function StartForm() {
         </label>
 
         <label className="space-y-1 text-sm text-slate-600">
-          <span>Mode</span>
+          <span>Question Source</span>
           <select
             value={testConfig.mode}
             onChange={(event) => setField('mode', event.target.value)}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           >
-            <option value="random">Random</option>
-            <option value="relevant">Relevant</option>
+            <option value="random">Generate full chapter test</option>
+            <option value="relevant">Generate specific topic test</option>
           </select>
         </label>
       </div>
 
       {testConfig.mode === 'relevant' && (
         <label className="space-y-1 text-sm text-slate-600">
-          <span>Query</span>
+          <span>Topic to Focus On</span>
           <input
             type="text"
             value={testConfig.query}
             onChange={(event) => setField('query', event.target.value)}
-            placeholder="Enter topic or concept"
+            placeholder="Example: binary trees, thermodynamics, DBMS joins"
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
         </label>
@@ -118,21 +124,172 @@ function StartForm() {
         <button
           type="submit"
           disabled={isGenerating}
-          className="rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300 disabled:hover:translate-y-0"
+          className="min-w-32 rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300 disabled:hover:translate-y-0"
         >
-          Start Test
+          {isGenerating ? 'Generating...' : 'Generate Test'}
         </button>
       </div>
     </form>
   );
 }
 
-function TestBody() {
+function formatDuration(totalSeconds) {
+  const safe = Math.max(0, Number(totalSeconds) || 0);
+  const mins = Math.floor(safe / 60);
+  const secs = safe % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function getGrade(percent) {
+  if (percent >= 90) return 'A+';
+  if (percent >= 80) return 'A';
+  if (percent >= 70) return 'B';
+  if (percent >= 60) return 'C';
+  if (percent >= 50) return 'D';
+  return 'E';
+}
+
+function ResultScreen({
+  isTheoryTest,
+  score,
+  totalQuestions,
+  answeredCount,
+  timerSeconds,
+  isAiBusy,
+  analysis,
+  onRetakeTest,
+  onBackSubject
+}) {
+  const [animatedPercent, setAnimatedPercent] = React.useState(0);
+  const finalPercent = Math.max(0, Math.min(100, Number(score?.percent) || 0));
+  const radius = 62;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference - (animatedPercent / 100) * circumference;
+  const initialSeconds = Math.max(5, Number(totalQuestions) || 10) * 60;
+  const timeTakenSeconds = Math.max(0, initialSeconds - (Number(timerSeconds) || 0));
+  const unattempted = Math.max(0, Number(totalQuestions) - Number(answeredCount));
+  const correct = Math.max(0, Number(score?.correct) || 0);
+  const wrong = Math.max(0, Number(totalQuestions) - correct - unattempted);
+  const marksText = isTheoryTest
+    ? `${Number(score?.awardedMarks) || 0} / ${Number(score?.totalMarks) || 0}`
+    : `${Number(score?.correct) || 0} / ${Number(score?.total) || 0}`;
+  const grade = getGrade(finalPercent);
+  const stats = [
+    { label: 'Total', value: totalQuestions, tone: 'text-slate-800' },
+    { label: 'Correct', value: correct, tone: 'text-emerald-700' },
+    { label: 'Wrong', value: wrong, tone: 'text-rose-700' },
+    { label: 'Unattempted', value: unattempted, tone: 'text-amber-700' },
+    { label: 'Time', value: formatDuration(timeTakenSeconds), tone: 'text-slate-800' }
+  ];
+
+  useEffect(() => {
+    const startId = setTimeout(() => setAnimatedPercent(finalPercent), 50);
+    return () => {
+      clearTimeout(startId);
+    };
+  }, [finalPercent]);
+
+  return (
+    <div className="flex-1 overflow-y-auto bg-slate-50 px-4 py-4 md:px-6 md:py-6">
+      <div className="mx-auto grid w-full max-w-6xl animate-softPop gap-4 md:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-smcard md:sticky md:top-3 md:h-fit">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Result</p>
+            <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+              Grade {grade}
+            </span>
+          </div>
+
+          <div className="mt-3 flex items-center gap-3">
+            <div className="relative grid h-32 w-32 place-items-center">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 160 160" role="img" aria-label={`Score ${finalPercent}%`}>
+                <circle
+                  cx="80"
+                  cy="80"
+                  r={radius}
+                  stroke="#e2e8f0"
+                  strokeWidth="8"
+                  fill="none"
+                />
+                <circle
+                  cx="80"
+                  cy="80"
+                  r={radius}
+                  stroke="#1d4ed8"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  fill="none"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={dashOffset}
+                  style={{
+                    transition: 'stroke-dashoffset 1200ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    filter: 'drop-shadow(0 0 5px rgba(29, 78, 216, 0.35))'
+                  }}
+                />
+              </svg>
+              <div className="absolute inset-0 grid place-items-center text-center">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Score</p>
+                <p className="text-xl font-extrabold text-slate-800">{Math.round(animatedPercent)}%</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-slate-500">Marks</p>
+              <p className="text-2xl font-extrabold tracking-tight text-slate-800">{marksText}</p>
+              {isTheoryTest && isAiBusy && (
+                <p className="mt-1 text-[11px] text-slate-500">Finalizing evaluation...</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {stats.map((item) => (
+              <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
+                <p className={`text-sm font-bold ${item.tone}`}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-2">
+            <button
+              type="button"
+              onClick={onRetakeTest}
+              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+            >
+              Retake Test
+            </button>
+            <button
+              type="button"
+              onClick={onBackSubject}
+              disabled={isAiBusy}
+              className="rounded-md border border-emerald-600 bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300"
+            >
+              Back to Subject
+            </button>
+          </div>
+        </aside>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-smcard md:p-5">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">AI-Powered Analysis</h3>
+            <AILabel label="AI Insights" active={analysis.loading} />
+          </div>
+          {!analysis.loading && !analysis.data && !analysis.error && (
+            <p className="text-sm text-slate-600">Preparing AI analysis...</p>
+          )}
+          <AnalysisSection analysis={analysis.data} loading={analysis.loading} error={analysis.error} />
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function TestBody({ onBackSubject }) {
   const {
-    activeTestType,
     isTheoryTest,
     questions,
     answers,
+    answeredMap,
     answeredCount,
     currentQuestionIndex,
     submitted,
@@ -140,20 +297,15 @@ function TestBody() {
     ui,
     setAnswer,
     requestSubmit,
-    showAnalysis,
     score,
     timerSeconds,
     totalQuestions,
     isAiBusy,
+    resetTestState,
     getCorrectAnswerIndex
   } = useTestContext();
-
   const questionRefs = useRef([]);
-  const title = submitted
-    ? (isTheoryTest ? `Final Marks: ${score.awardedMarks}/${score.totalMarks}` : `Final Score: ${score.correct}/${score.total}`)
-    : (isTheoryTest ? 'Theory Test' : 'MCQ Test');
-  const analysisLabel = isTheoryTest ? 'Show Evaluation' : 'Show Analysis';
-  const hideAnalysisLabel = isTheoryTest ? 'Hide Evaluation' : 'Hide Analysis';
+  const title = isTheoryTest ? 'Theory Test' : 'MCQ Test';
   const unansweredCount = Math.max(0, totalQuestions - answeredCount);
 
   useEffect(() => {
@@ -167,6 +319,22 @@ function TestBody() {
     return <StartForm />;
   }
 
+  if (submitted) {
+    return (
+      <ResultScreen
+        isTheoryTest={isTheoryTest}
+        score={score}
+        totalQuestions={totalQuestions}
+        answeredCount={Object.values(answeredMap || {}).filter(Boolean).length}
+        timerSeconds={timerSeconds}
+        isAiBusy={isAiBusy}
+        analysis={analysis}
+        onRetakeTest={resetTestState}
+        onBackSubject={onBackSubject}
+      />
+    );
+  }
+
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-slate-50">
       <ScoreHeader
@@ -177,7 +345,7 @@ function TestBody() {
         score={score}
         submitted={submitted}
         aiBusy={isAiBusy}
-        testType={activeTestType}
+        testType={isTheoryTest ? 'theory' : 'mcq'}
         paperMode
       />
 
@@ -216,24 +384,6 @@ function TestBody() {
           ))}
         </div>
 
-        {submitted && (
-          <div className="mx-auto flex w-full max-w-4xl items-center justify-end">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-              onClick={showAnalysis}
-            >
-              <AILabel label="AI Insights" active={analysis.loading || analysis.visible} />
-              <span>{analysis.visible ? hideAnalysisLabel : analysisLabel}</span>
-            </button>
-          </div>
-        )}
-
-        {analysis.visible && (
-          <div className="mx-auto w-full max-w-4xl">
-            <AnalysisSection analysis={analysis.data} loading={analysis.loading} error={analysis.error} />
-          </div>
-        )}
       </div>
 
       {!submitted && (
@@ -253,7 +403,7 @@ function TestBody() {
               onClick={requestSubmit}
               className="rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
             >
-              Submit Test
+              {isTheoryTest ? 'Evaluate Test' : 'Submit Test'}
             </button>
           </div>
         </div>
@@ -263,7 +413,7 @@ function TestBody() {
 }
 
 function TestContainerInner({ isOpen, onClose, title }) {
-  const { ui, closeConfirm, confirmSubmit, resetTestState, isGenerating, analysis } = useTestContext();
+  const { ui, closeConfirm, confirmSubmit, resetTestState, isGenerating, analysis, isTheoryTest } = useTestContext();
   const isBusy = isGenerating || analysis.loading;
 
   useEffect(() => {
@@ -276,7 +426,7 @@ function TestContainerInner({ isOpen, onClose, title }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-[1500] bg-slate-900/55 p-2 md:p-6" onClick={() => !isBusy && onClose()}>
+      <div className="fixed inset-0 z-[12050] bg-slate-900/55 p-2 md:p-6" onClick={() => !isBusy && onClose()}>
         <div
           className="mx-auto flex h-full w-full max-w-7xl animate-softPop flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
           onClick={(event) => event.stopPropagation()}
@@ -293,11 +443,16 @@ function TestContainerInner({ isOpen, onClose, title }) {
             </button>
           </div>
 
-          <TestBody />
+          <TestBody onBackSubject={() => !isBusy && onClose()} />
         </div>
       </div>
 
-      <SubmitConfirmDialog open={ui.confirmOpen} onCancel={closeConfirm} onConfirm={confirmSubmit} />
+      <SubmitConfirmDialog
+        open={ui.confirmOpen}
+        onCancel={closeConfirm}
+        onConfirm={confirmSubmit}
+        testType={isTheoryTest ? 'theory' : 'mcq'}
+      />
     </>
   );
 }

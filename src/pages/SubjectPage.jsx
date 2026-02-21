@@ -133,7 +133,7 @@ export default function SubjectPage() {
   return (
     <div className="subject-page">
       <div className="subject-page-header">
-        <h1>Subject Resources</h1>
+        <h1>{subjectMeta?.subject ? `${subjectMeta.subject} Resources` : 'Subject Resources'}</h1>
         {canUpload && (
           <button type="button" className="btn-upload" onClick={() => setUploadOpen(true)}>
             Upload resource
