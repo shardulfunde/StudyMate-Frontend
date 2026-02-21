@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 
-// Pages
 import Dashboard from './pages/Dashboard';
 import Notes from './pages/Notes';
 import Assignments from './pages/Assignments';
@@ -12,30 +11,34 @@ import CogniMatePage from './pages/CogniMatePage';
 import Download from './pages/Download';
 import SubjectPage from './pages/SubjectPage';
 import AdminPanel from './pages/AdminPanel';
+import LandingPage from './pages/LandingPage';
 
-// Context & Utils
 import { useCapabilities } from './context/CapabilityContext';
 import { useToast } from './context/ToastContext';
-import { buildPermissions } from './utils/permissions'; // <--- IMPORT THIS
-import { api, setApiHandlers } from './services/api';
+import { buildPermissions } from './utils/permissions';
+import { setApiHandlers } from './services/api';
 import { initAuthTokenSync, signInWithGoogle, signOut } from './services/auth';
 
 function App() {
-  const {
-    user,
-    loading, // Changed from loadingAuth/loadingCapabilities to match your Context
-    capabilities
-  } = useCapabilities();
+  const { user, loading, capabilities } = useCapabilities();
   const { showToast } = useToast();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [authError, setAuthError] = useState('');
 
-  // 1. Calculate Permissions
   const permissions = buildPermissions(capabilities);
   const isAdmin = permissions.hasAdminAccess();
 
   useEffect(() => {
-    const unsubscribeTokenSync = initAuthTokenSync();
-    return unsubscribeTokenSync;
+    const unsubscribe = initAuthTokenSync();
+    return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      setIsSigningIn(false);
+      setAuthError('');
+    }
+  }, [user]);
 
   useEffect(() => {
     setApiHandlers({
@@ -43,55 +46,49 @@ function App() {
         await signOut();
       },
       onForbidden: async (err) => {
-        const message = err?.detail?.detail || err?.message || 'You do not have permission to perform this action.';
-        showToast(message, 'error');
+        showToast(err?.message || 'No permission', 'error');
       },
-      onRateLimit: async (err, meta) => {
-        const retryAfter = meta?.retryAfterSeconds;
-        const fallback = err?.detail?.detail || err?.message || 'Too many requests. Please wait and try again.';
-        const message = Number.isFinite(retryAfter)
-          ? `Rate limit reached. Try again in ${retryAfter} seconds.`
-          : fallback;
-        showToast(message, 'error', 4200);
+      onRateLimit: async (err) => {
+        showToast(err?.message || 'Rate limit', 'error');
       }
     });
 
-    return () => setApiHandlers({ onUnauthorized: null, onForbidden: null, onRateLimit: null });
+    return () => {
+      setApiHandlers({ onUnauthorized: null, onForbidden: null, onRateLimit: null });
+    };
   }, [showToast]);
 
-  useEffect(() => {
-    if (user) {
-      api.get('/').catch(() => {});
-    }
-  }, [user]);
+  const handleGoogleSignIn = useCallback(async () => {
+    if (isSigningIn) return;
+    setIsSigningIn(true);
+    setAuthError('');
 
-  // 2. Handle Loading State
+    try {
+      await signInWithGoogle();
+    } catch {
+      setAuthError('Sign-in failed. Try again.');
+      setIsSigningIn(false);
+    }
+  }, [isSigningIn]);
+
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f4f4f4' }}>
-        <LoadingSpinner message="Loading StudyMate..." />
+      <div className="login-loading">
+        <LoadingSpinner message="Initializing StudyMate..." />
       </div>
     );
   }
 
-  // 3. Handle Login Screen
   if (!user) {
     return (
-      <div className="login-screen">
-        <h1>📚 StudyMate</h1>
-        <p>Your academic companion. Sign in to continue.</p>
-        <button
-          type="button"
-          className="login-button"
-          onClick={signInWithGoogle}
-        >
-          Sign in with Google
-        </button>
-      </div>
+      <LandingPage
+        onGoogleSignIn={handleGoogleSignIn}
+        isSigningIn={isSigningIn}
+        authError={authError}
+      />
     );
   }
 
-  // 4. Render App
   return (
     <Layout>
       <Routes>
@@ -102,13 +99,10 @@ function App() {
         <Route path="/cognimate" element={<CogniMatePage />} />
         <Route path="/download" element={<Download />} />
         <Route path="/subject/:subjectId" element={<SubjectPage />} />
-        
-        {/* 5. Use the calculated 'isAdmin' variable */}
         <Route
           path="/admin"
           element={isAdmin ? <AdminPanel /> : <Navigate to="/" replace />}
         />
-        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

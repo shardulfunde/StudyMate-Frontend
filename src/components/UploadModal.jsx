@@ -9,6 +9,7 @@ export default function UploadModal({ subjectId, onClose, onDone, resourceType =
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false); // New success state
   const inputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -30,6 +31,7 @@ export default function UploadModal({ subjectId, onClose, onDone, resourceType =
     }
     setError(null);
     setLoading(true);
+    
     try {
       const { upload_url, fields, file_key } = await api.post(
         `/generate-upload-url/${subjectId}/${resourceType}?filename=${encodeURIComponent(file.name)}`,
@@ -39,34 +41,31 @@ export default function UploadModal({ subjectId, onClose, onDone, resourceType =
 
       async function uploadToS3(uploadUrl, fieldsObj, fileObj) {
         const formData = new FormData();
-
         Object.entries(fieldsObj).forEach(([key, value]) => {
           formData.append(key, value);
         });
-
         formData.append('file', fileObj);
 
         const response = await fetch(uploadUrl, { method: 'POST', body: formData });
-
-        try {
-          const text = await response.text();
-          console.debug('S3 upload response:', response.status, text);
-        } catch {
-          console.debug('S3 upload status:', response.status);
-        }
-
+        
         if (response.status !== 204) {
           const text = await response.text().catch(() => '');
           throw new Error(`S3 Upload failed: ${response.status} ${text}`);
         }
-
         return true;
       }
 
       await uploadToS3(upload_url, fields, file);
-
       await confirmUpload(subjectId, title.trim(), resourceType, file_key, { adminAction: true });
-      onDone();
+      
+      // Trigger the dopamine hit!
+      setIsSuccess(true);
+      
+      // Wait 1.8 seconds so they can enjoy the animation before closing
+      setTimeout(() => {
+        onDone();
+      }, 1800);
+
     } catch (err) {
       setError(err.detail?.detail || err.message || 'Upload failed');
     } finally {
@@ -77,49 +76,70 @@ export default function UploadModal({ subjectId, onClose, onDone, resourceType =
   return (
     <div className="upload-modal-overlay" onClick={onClose}>
       <div className="upload-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="upload-modal-header">
-          <div>
-            <h2>Upload Resource</h2>
-            <p className="upload-modal-subtitle">Add a {resourceType} file for this subject.</p>
-          </div>
-          <button type="button" className="upload-modal-close" onClick={onClose}>
-            x
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="upload-modal-form">
-          <label>
-            Title
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Unit 1 Notes"
-              required
-            />
-          </label>
-
-          <label>
-            File (max {MAX_MB} MB)
-            <div className="upload-file-wrap">
-              <input
-                ref={inputRef}
-                type="file"
-                onChange={handleFileChange}
-                accept=".pdf,.doc,.docx"
-              />
+        
+        {isSuccess ? (
+          // --- DOPAMINE SUCCESS SCREEN ---
+          <div className="upload-success-content">
+            <div className="success-icon-wrapper">
+              <svg className="dopamine-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+              </svg>
             </div>
-            {file && <span className="upload-filename">{file.name}</span>}
-          </label>
-
-          {error && <p className="upload-error">{error}</p>}
-
-          <div className="upload-modal-actions">
-            <button type="button" onClick={onClose}>Cancel</button>
-            <button type="submit" disabled={loading}>
-              {loading ? 'Uploading...' : 'Upload'}
-            </button>
+            <h3>Upload Complete!</h3>
+            <p>Your {resourceType} have been successfully added.</p>
           </div>
-        </form>
+        ) : (
+          // --- ORIGINAL FORM ---
+          <>
+            <div className="upload-modal-header">
+              <div>
+                <h2>Upload Resource</h2>
+                <p className="upload-modal-subtitle">Add a {resourceType} file for this subject.</p>
+              </div>
+              <button type="button" className="upload-modal-close" onClick={onClose} disabled={loading}>
+                x
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="upload-modal-form">
+              <label>
+                Title
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Unit 1 Notes"
+                  required
+                  disabled={loading}
+                />
+              </label>
+
+              <label>
+                File (max {MAX_MB} MB)
+                <div className="upload-file-wrap">
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx"
+                    disabled={loading}
+                  />
+                </div>
+                {file && <span className="upload-filename">{file.name}</span>}
+              </label>
+
+              {error && <p className="upload-error">{error}</p>}
+
+              <div className="upload-modal-actions">
+                <button type="button" onClick={onClose} disabled={loading}>Cancel</button>
+                <button type="submit" disabled={loading}>
+                  {loading ? 'Uploading...' : 'Upload'}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

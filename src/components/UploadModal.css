@@ -7,6 +7,7 @@
   justify-content: center;
   z-index: 1200;
   padding: 1rem;
+  animation: uploadOverlayFadeIn 220ms ease-out;
 }
 
 .upload-modal {
@@ -16,6 +17,8 @@
   box-shadow: 0 18px 34px rgba(2, 6, 23, 0.24);
   width: 100%;
   max-width: 480px;
+  transform-origin: 50% 50%;
+  animation: uploadModalPopIn 260ms cubic-bezier(0.2, 0.9, 0.25, 1);
 }
 
 .upload-modal-header {
@@ -173,4 +176,120 @@
 .upload-modal-actions button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+/* --- Keep all your existing CSS exactly as is above this line --- */
+
+/* =========================================
+   DOPAMINE SUCCESS ANIMATION STYLES
+   ========================================= */
+
+.upload-success-content {
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.upload-success-content h3 {
+  margin: 1.2rem 0 0.4rem;
+  color: #0f172a;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+}
+
+.upload-success-content p {
+  color: #64748b;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* The subtle blue circle behind the checkmark */
+.success-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  box-shadow: 0 0 0 10px rgba(29, 78, 216, 0.05);
+  animation: successHaloPulse 900ms ease-out 1;
+}
+
+/* The SVG Checkmark */
+.dopamine-checkmark {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 4.5;
+  stroke: #1d4ed8; /* Your primary blue */
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px #1d4ed8;
+  animation: scaleBounce 0.4s ease-in-out 0.8s both;
+}
+
+/* Draws the circle outline */
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 4.5;
+  stroke-miterlimit: 10;
+  stroke: #1d4ed8;
+  fill: none;
+  animation: drawStroke 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+/* Draws the actual check tick */
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: drawStroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+}
+
+/* Animations */
+@keyframes drawStroke {
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes scaleBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes uploadOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes uploadModalPopIn {
+  0% { opacity: 0; transform: translateY(10px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes successHaloPulse {
+  0% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.14); }
+  100% { box-shadow: 0 0 0 16px rgba(29, 78, 216, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upload-modal-overlay,
+  .upload-modal,
+  .upload-success-content,
+  .success-icon-wrapper,
+  .dopamine-checkmark,
+  .checkmark-circle,
+  .checkmark-check {
+    animation: none !important;
+  }
 }

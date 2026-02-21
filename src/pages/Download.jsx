@@ -1,42 +1,68 @@
+import { STUDYMATE_ANDROID_APK_URL } from '../config';
 import './Download.css';
 
-const DOWNLOAD_URL = 'https://download1591.mediafire.com/pxogs5y4vxkgMujgo_TfQ9GoWJVqg9ld0zzmNAvZPEf_cdwEBJr31fY1QsJhsJEUmnLFTo0zGzqe7HIlNN36ShaLdvBwzGCm-ph-JP_COw1580gbf_cvIoL3XhSIIN_Z-u3Re3WjTiXWhNRrgArKj5ihV2iO9MDFDJnIfAfWJL23ajA/61qxaer5bc4u8o4/StudyMate.apk';
+const ICONS = {
+  app: '\u{1F4F1}',
+  download: '\u{1F4E5}',
+  mobile: '\u{1F4F1}',
+  optimized: '\u{1F973}',
+  resources: '\u{1F4DA}',
+  fast: '\u{1F680}'
+};
 
 export default function Download() {
   return (
     <>
       <section className="download-section">
-        <div className="app-icon">📱</div>
+        <div className="app-icon" aria-hidden="true">{ICONS.app}</div>
         <h1 className="download-title">Download StudyMate App</h1>
         <p className="download-description">
-          Access all your study materials on your mobile device and enjoy a better learning experience with our StudyMate app.
+          Access all your study materials on your mobile device and enjoy a better
+          learning experience with the StudyMate app.
         </p>
-        <a href={DOWNLOAD_URL} className="download-button" target="_blank" rel="noopener noreferrer">
-          📥 Download Now
+        <a
+          href={STUDYMATE_ANDROID_APK_URL}
+          className="download-button"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {ICONS.download} Download Now
         </a>
       </section>
+
       <section className="features">
         <h2 className="features-title">App Features</h2>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">📱</div>
+            <div className="feature-icon" aria-hidden="true">{ICONS.mobile}</div>
             <h3 className="feature-title">Mobile-Friendly</h3>
-            <p className="feature-description">Optimized for mobile devices with a smooth, responsive interface</p>
+            <p className="feature-description">
+              Optimized for mobile devices with a smooth, responsive interface
+            </p>
           </div>
+
           <div className="feature-card">
-            <div className="feature-icon">🤳</div>
+            <div className="feature-icon" aria-hidden="true">{ICONS.optimized}</div>
             <h3 className="feature-title">Mobile Optimized</h3>
-            <p className="feature-description">Designed specifically for a smooth mobile experience</p>
+            <p className="feature-description">
+              Designed specifically for a smooth mobile experience
+            </p>
           </div>
+
           <div className="feature-card">
-            <div className="feature-icon">📚</div>
+            <div className="feature-icon" aria-hidden="true">{ICONS.resources}</div>
             <h3 className="feature-title">Complete Resources</h3>
-            <p className="feature-description">Access notes, assignments, and previous year papers</p>
+            <p className="feature-description">
+              Access notes, assignments, and previous year papers
+            </p>
           </div>
+
           <div className="feature-card">
-            <div className="feature-icon">🚀</div>
-            <h3 className="feature-title">Fast & Lightweight</h3>
-            <p className="feature-description">Quick to download and easy on your device's resources</p>
+            <div className="feature-icon" aria-hidden="true">{ICONS.fast}</div>
+            <h3 className="feature-title">Fast and Lightweight</h3>
+            <p className="feature-description">
+              Quick to download and easy on your device resources
+            </p>
           </div>
         </div>
       </section>
