@@ -121,7 +121,7 @@ export default function SubjectPage() {
 
   const handleDeleteResource = useCallback(async (resourceId) => {
     try {
-      await api.delete(`/resources/${resourceId}`, { adminAction: true });
+      await api.delete(`/resource/${resourceId}`, { adminAction: true });
       removeResource(resourceId);
       showToast('Resource deleted', 'success');
     } catch (err) {
