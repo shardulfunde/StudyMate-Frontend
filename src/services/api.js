@@ -435,3 +435,36 @@ export async function analyzeTheoryTestAxios(payload) {
     throw normalizeAxiosError(error, '/tests/theorytest/analyze');
   }
 }
+
+/**
+ * @param {{
+ *  full_name: string,
+ *  phone_number: string,
+ *  branch: string,
+ *  year: number,
+ *  motivation?: string | null
+ * }} payload
+ * @param {Object=} meta
+ * @returns {Promise<{application_id: string, status: "pending", message: string}>}
+ */
+export async function submitModeratorApplication(payload, meta = {}) {
+  return api.post('/moderator/apply', payload, meta);
+}
+
+/**
+ * @param {"pending"|"approved"|"rejected"|"all"} status
+ * @param {Object=} meta
+ */
+export async function getModeratorApplications(status = 'pending', meta = {}) {
+  const safeStatus = status || 'pending';
+  return api.get(`/moderator/applications?status=${encodeURIComponent(safeStatus)}`, meta);
+}
+
+/**
+ * @param {string} applicationId
+ * @param {"approve"|"reject"} action
+ * @param {Object=} meta
+ */
+export async function reviewModeratorApplication(applicationId, action, meta = {}) {
+  return api.post(`/moderator/applications/${applicationId}/decision`, { action }, meta);
+}

@@ -5,10 +5,11 @@ import { buildPermissions } from '../utils/permissions';
 import RoleManager from '../components/RoleManager';
 import StructureManager from '../components/StructureManager';
 import AdminUploadManager from '../components/AdminUploadManager';
+import ModeratorRequestsManager from '../components/ModeratorRequestsManager';
 import './AdminPanel.css';
 
 export default function AdminPanel() {
-  const { capabilities } = useCapabilities();
+  const { capabilities, isPlatformSuperadmin } = useCapabilities();
   const permissions = buildPermissions(capabilities);
 
   if (!permissions.hasAdminAccess()) {
@@ -18,9 +19,14 @@ export default function AdminPanel() {
   const canManageStructure = permissions.canManageStructure();
   const canManageRoles = permissions.canManageRoles();
   const canUploadNotes = permissions.canManageResourceSubject();
+  const canReviewModeratorRequests = Boolean(isPlatformSuperadmin);
   const [activeTab, setActiveTab] = useState("structure");
 
   useEffect(() => {
+    if (canReviewModeratorRequests) {
+      setActiveTab("moderator-requests");
+      return;
+    }
     if (!canManageStructure && canManageRoles) {
       setActiveTab("roles");
       return;
@@ -28,7 +34,7 @@ export default function AdminPanel() {
     if (!canManageStructure && !canManageRoles && canUploadNotes) {
       setActiveTab("notes-upload");
     }
-  }, [canManageStructure, canManageRoles, canUploadNotes]);
+  }, [canManageStructure, canManageRoles, canUploadNotes, canReviewModeratorRequests]);
 
   return (
     <div className="admin-panel">
@@ -68,6 +74,15 @@ export default function AdminPanel() {
               Notes Upload
             </button>
           )}
+          {canReviewModeratorRequests && (
+            <button
+              type="button"
+              className={`admin-tab ${activeTab === "moderator-requests" ? "active" : ""}`}
+              onClick={() => setActiveTab("moderator-requests")}
+            >
+              Moderator Requests
+            </button>
+          )}
         </div>
 
         <div className="admin-tab-panel">
@@ -81,6 +96,10 @@ export default function AdminPanel() {
 
           {activeTab === "notes-upload" && canUploadNotes && (
             <AdminUploadManager />
+          )}
+
+          {activeTab === "moderator-requests" && canReviewModeratorRequests && (
+            <ModeratorRequestsManager />
           )}
         </div>
       </div>

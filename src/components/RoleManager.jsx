@@ -11,11 +11,9 @@ const ROLE_OPTIONS = [
   { value: 'subject_admin', label: 'Subject Admin', scope: 'subject' }
 ];
 
-export default function RoleManager({ users, onUpdate }) {
+export default function RoleManager({ onUpdate }) {
   const { capabilities } = useCapabilities();
   const permissions = buildPermissions(capabilities);
-
-  const [fetchedUsers, setFetchedUsers] = useState([]);
 
   const [selectedUserEmail, setSelectedUserEmail] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
@@ -29,16 +27,6 @@ export default function RoleManager({ users, onUpdate }) {
   const [years, setYears] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [colleges, setColleges] = useState([]);
-
-  const effectiveUsers = users ?? fetchedUsers;
-  const normalizedUsers = useMemo(
-    () =>
-      (effectiveUsers || []).map((u) => ({
-        email: u.email,
-        role: u.role
-      })),
-    [effectiveUsers]
-  );
 
   const assignableRoles = useMemo(() => {
     const allowed = new Set(permissions.getAssignableRoleTypes());
@@ -109,19 +97,6 @@ export default function RoleManager({ users, onUpdate }) {
   }, []);
 
   useEffect(() => {
-    if (users !== undefined) return;
-    const loadUsers = async () => {
-      try {
-        const data = await api.get('/users', { adminAction: true });
-        setFetchedUsers(Array.isArray(data) ? data : []);
-      } catch (e) {
-        setFetchedUsers([]);
-      }
-    };
-    loadUsers();
-  }, [users]);
-
-  useEffect(() => {
     setScopeId('');
     setSelectedProgramId('');
     setSelectedYearId('');
@@ -137,9 +112,16 @@ export default function RoleManager({ users, onUpdate }) {
 
   const handleAssignRole = async (event) => {
     event.preventDefault();
+    const cleanEmail = selectedUserEmail.trim();
 
-    if (!selectedUserEmail) {
-      setMessage({ type: 'error', text: 'Select a user first.' });
+    if (!cleanEmail) {
+      setMessage({ type: 'error', text: 'Enter a user email first.' });
+      return;
+    }
+
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail);
+    if (!validEmail) {
+      setMessage({ type: 'error', text: 'Enter a valid email address.' });
       return;
     }
 
@@ -160,7 +142,7 @@ export default function RoleManager({ users, onUpdate }) {
 
     const payload = {
       target_user_id: null,
-      target_email: selectedUserEmail,
+      target_email: cleanEmail,
       role_type: selectedRole,
       scope_type: activeScope,
       scope_id: scopeId
@@ -327,21 +309,16 @@ export default function RoleManager({ users, onUpdate }) {
 
       <form onSubmit={handleAssignRole} className="role-form">
         <div className="form-group">
-          <label htmlFor="user-select">User</label>
-          <select
-            id="user-select"
+          <label htmlFor="user-email">User Email</label>
+          <input
+            id="user-email"
+            type="email"
             value={selectedUserEmail}
             onChange={(e) => setSelectedUserEmail(e.target.value)}
+            placeholder="name@example.com"
             disabled={loading}
             required
-          >
-            <option value="">Select a user</option>
-            {normalizedUsers.map((user) => (
-              <option key={user.email} value={user.email}>
-                {user.email} ({user.role})
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         <div className="form-group">

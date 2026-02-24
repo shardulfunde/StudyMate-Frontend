@@ -40,6 +40,11 @@ export default function Layout({ children }) {
           <Link to="/assignments" className={location.pathname === '/assignments' ? 'active' : ''}>Assignments</Link>
           <Link to="/pyqs" className={location.pathname === '/pyqs' ? 'active' : ''}>Previous Papers</Link>
           <Link to="/ai-features" className={location.pathname === '/ai-features' ? 'active' : ''}>StudyMate AI Studio</Link>
+          {!hasAdminAccess && (
+            <Link to="/moderator-application" className={location.pathname === '/moderator-application' ? 'active' : ''}>
+              Moderator Application
+            </Link>
+          )}
           <Link to="/cognimate" className={location.pathname === '/cognimate' ? 'active' : ''}>CogniMate</Link>
           <Link to="/download" className={location.pathname === '/download' ? 'active' : ''}>Coming Soon</Link>
           {hasAdminAccess && (

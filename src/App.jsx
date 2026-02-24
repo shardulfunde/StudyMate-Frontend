@@ -13,6 +13,8 @@ import SubjectPage from './pages/SubjectPage';
 import AdminPanel from './pages/AdminPanel';
 import LandingPage from './pages/LandingPage';
 import AIFeaturesPage from './pages/AIFeaturesPage';
+import ModeratorApplicationPage from './pages/ModeratorApplicationPage';
+import AcademicTeamPage from './pages/AcademicTeamPage';
 
 import { useCapabilities } from './context/CapabilityContext';
 import { useToast } from './context/ToastContext';
@@ -99,6 +101,9 @@ function App() {
         <Route path="/pyqs" element={<Pyqs />} />
         <Route path="/cognimate" element={<CogniMatePage />} />
         <Route path="/ai-features" element={<AIFeaturesPage />} />
+        <Route path="/academic-team" element={<AcademicTeamPage />} />
+        <Route path="/moderator-application" element={<ModeratorApplicationPage />} />
+        <Route path="/apply-moderator" element={<ModeratorApplicationPage />} />
         <Route path="/download" element={<Download />} />
         <Route path="/subject/:subjectId" element={<SubjectPage />} />
         <Route

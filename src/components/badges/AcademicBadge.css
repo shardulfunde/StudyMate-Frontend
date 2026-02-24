@@ -1,0 +1,44 @@
+.academic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid #2563eb;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  user-select: none;
+}
+
+.academic-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.15);
+}
+
+.academic-badge-icon {
+  flex-shrink: 0;
+}
+
+.academic-badge-label {
+  font-size: 0.75rem;
+}
+
+.academic-badge-level {
+  font-size: 0.7rem;
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+.academic-badge-sm {
+  padding: 0.2rem 0.55rem;
+}
+
+.academic-badge-md {
+  padding: 0.3rem 0.7rem;
+}
+
+.academic-badge-lg {
+  padding: 0.45rem 0.9rem;
+}

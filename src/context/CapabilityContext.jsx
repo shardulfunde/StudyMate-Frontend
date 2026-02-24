@@ -11,6 +11,22 @@ function normalizeManagedScope(value) {
   return Array.isArray(value) ? value.map((id) => String(id)) : [];
 }
 
+function hasManagedScope(value) {
+  if (value === 'ALL') return true;
+  return Array.isArray(value) && value.length > 0;
+}
+
+function deriveHighestRole(capabilities) {
+  if (!capabilities || typeof capabilities !== 'object') return null;
+
+  if (capabilities.isPlatformSuperadmin) return 'college_superadmin';
+  if (hasManagedScope(capabilities.managedColleges)) return 'college_superadmin';
+  if (hasManagedScope(capabilities.managedPrograms)) return 'program_admin';
+  if (hasManagedScope(capabilities.managedYears)) return 'year_admin';
+  if (hasManagedScope(capabilities.managedSubjects)) return 'subject_admin';
+  return null;
+}
+
 export function CapabilityProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -75,6 +91,7 @@ export function CapabilityProvider({ children }) {
   );
 
   const hasAdminAccess = permissions.hasAdminAccess();
+  const highestRole = deriveHighestRole(capabilities);
   const derivedCanManageResources =
     capabilities.isPlatformSuperadmin ||
     capabilities.managedColleges === 'ALL' ||
@@ -97,6 +114,7 @@ export function CapabilityProvider({ children }) {
         managedPrograms: capabilities.managedPrograms,
         managedYears: capabilities.managedYears,
         managedSubjects: capabilities.managedSubjects,
+        highestRole,
         canManageResources: derivedCanManageResources,
         hasAdminAccess
       }}

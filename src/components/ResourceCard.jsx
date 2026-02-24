@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../services/api';
 import PDFViewer from './PDFViewer';
 import TestContainer from './test-ui/TestContainer';
+import AcademicBadge from './badges/AcademicBadge';
 import './ResourceCard.css';
 
 const RESOURCE_ICONS = ['📘', '📗', '📙', '📕', '🗂️', '🧾', '📝', '📄'];
@@ -47,13 +48,11 @@ export default function ResourceCard({
 
   useEffect(() => {
     if (!menuOpen) return undefined;
-
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpen]);
@@ -78,7 +77,6 @@ export default function ResourceCard({
     if (generateDisabled) return;
     setMenuOpen(false);
     setIsGenerating(true);
-
     try {
       await onGenerateEmbeddings(resource.id);
     } catch {
@@ -97,7 +95,6 @@ export default function ResourceCard({
 
   const handleDeleteConfirm = async () => {
     if (!onDelete) return;
-
     setDeleting(true);
     try {
       await onDelete(resource.id);
@@ -109,13 +106,8 @@ export default function ResourceCard({
     }
   };
 
-  const openTestModal = () => {
-    setTestModalOpen(true);
-  };
-
-  const closeTestModal = () => {
-    setTestModalOpen(false);
-  };
+  const openTestModal = () => setTestModalOpen(true);
+  const closeTestModal = () => setTestModalOpen(false);
 
   const dateStr = resource.created_at
     ? new Date(resource.created_at).toLocaleDateString(undefined, {
@@ -125,77 +117,94 @@ export default function ResourceCard({
       })
     : '';
   const resourceIcon = pickResourceIcon(resource.title || resource.id);
+  const uploadedByEmail = typeof resource?.uploaded_by === 'string'
+    ? resource.uploaded_by
+    : (resource?.uploaded_by?.email || '');
+  const uploaderHandle = uploadedByEmail ? uploadedByEmail.split('@')[0] : 'uploader';
 
   return (
     <>
-      <div className="resource-card">
-        <div className="resource-card-menu" ref={menuRef}>
-          <button
-            type="button"
-            className="btn-menu"
-            aria-label="Open resource actions"
-            aria-expanded={menuOpen}
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuOpen((prev) => !prev);
-            }}
-          >
-            &#8942;
-          </button>
+      <div className="resource-card sm-resource-card">
+        {/* HEADER: Icon, Title, and Menu */}
+        <div className="rc-header">
+          <div className="rc-title-area">
+            <div className="rc-icon" aria-hidden="true">{resourceIcon}</div>
+            <h3 className="rc-title" title={resource.title}>{resource.title}</h3>
+          </div>
+          
+          <div className="rc-menu-container" ref={menuRef}>
+            <button
+              type="button"
+              className="rc-btn-menu"
+              aria-label="Open resource actions"
+              aria-expanded={menuOpen}
+              onClick={(e) => {
+                e.stopPropagation();
+                setMenuOpen((prev) => !prev);
+              }}
+            >
+              &#8942;
+            </button>
 
-          {menuOpen && (
-            <div className="resource-card-dropdown" role="menu" onClick={(e) => e.stopPropagation()}>
-              <div className="dropdown-label">Uploaded By: {resource.uploaded_by || 'Unknown'}</div>
-              {canManageActions && (
-                <>
-                  <div className="dropdown-divider" />
-                  <button
-                    type="button"
-                    className={`dropdown-item dropdown-item-embedding${isEmbeddingCompleted ? ' is-completed' : ''}`}
-                    disabled={generateDisabled}
-                    onClick={handleGenerate}
-                  >
-                    <span>{embeddingActionLabel}</span>
-                    {showProcessingSpinner && <span className="menu-spinner" aria-hidden="true" />}
-                  </button>
-                  <button
-                    type="button"
-                    className="dropdown-item delete"
-                    onClick={handleDeleteClick}
-                  >
-                    Delete Resource
-                  </button>
-                </>
-              )}
-            </div>
-          )}
+            {menuOpen && (
+              <div className="rc-dropdown" role="menu" onClick={(e) => e.stopPropagation()}>
+                <div className="rc-dropdown-label">By: {uploadedByEmail || 'Unknown'}</div>
+                {canManageActions && (
+                  <>
+                    <div className="rc-dropdown-divider" />
+                    <button
+                      type="button"
+                      className={`rc-dropdown-item ${isEmbeddingCompleted ? 'is-completed' : ''}`}
+                      disabled={generateDisabled}
+                      onClick={handleGenerate}
+                    >
+                      <span>{embeddingActionLabel}</span>
+                      {showProcessingSpinner && <span className="rc-menu-spinner" aria-hidden="true" />}
+                    </button>
+                    <button
+                      type="button"
+                      className="rc-dropdown-item delete"
+                      onClick={handleDeleteClick}
+                    >
+                      Delete Resource
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="resource-card-title-row">
-          <span className="resource-card-icon" aria-hidden="true">{resourceIcon}</span>
-          <h3 className="resource-card-title">{resource.title}</h3>
+        {/* BODY: Meta info and Badges */}
+        <div className="rc-body">
+          <p className="rc-meta">
+            {uploadedByEmail && <span className="rc-author">{uploaderHandle}</span>}
+            {uploadedByEmail && dateStr && <span className="rc-separator">•</span>}
+            {dateStr && <span className="rc-date">{dateStr}</span>}
+          </p>
+          
+          <div className="rc-badge-row">
+            <AcademicBadge size="sm" />
+          </div>
+
+          {error && <div className="rc-error">{error}</div>}
         </div>
-        <p className="resource-card-meta">
-          {resource.uploaded_by && <span>By {resource.uploaded_by.split('@')[0]}</span>}
-          <br />
-          {dateStr && <span className="resource-date">{dateStr}</span>}
-        </p>
 
-        {error && <p className="resource-card-error">{error}</p>}
-
-        <div className="resource-card-actions">
+        {/* FOOTER: Actions */}
+        <div className="rc-footer">
           <button
             type="button"
-            className="btn-view"
+            className="rc-btn rc-btn-secondary rc-btn-view"
             onClick={handleView}
             disabled={loading}
           >
             {loading ? 'Opening...' : 'View'}
           </button>
+          
           {isEmbeddingCompleted && (
             <button
               type="button"
-              className="btn-generate-test"
+              className="rc-btn rc-btn-secondary rc-btn-generate"
               onClick={openTestModal}
             >
               Generate Test
@@ -204,15 +213,16 @@ export default function ResourceCard({
         </div>
       </div>
 
+      {/* Modals remain structurally the same, just styled nicely via CSS */}
       {confirmDeleteOpen && (
-        <div className="resource-confirm-overlay" onClick={() => !deleting && setConfirmDeleteOpen(false)}>
-          <div className="resource-confirm-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="rc-modal-overlay" onClick={() => !deleting && setConfirmDeleteOpen(false)}>
+          <div className="rc-modal-content" onClick={(e) => e.stopPropagation()}>
             <h4>Delete resource?</h4>
-            <p>This action cannot be undone.</p>
-            <div className="resource-confirm-actions">
+            <p>This action cannot be undone. It will be permanently removed.</p>
+            <div className="rc-modal-actions">
               <button
                 type="button"
-                className="confirm-cancel"
+                className="rc-btn-modal cancel"
                 onClick={() => setConfirmDeleteOpen(false)}
                 disabled={deleting}
               >
@@ -220,11 +230,11 @@ export default function ResourceCard({
               </button>
               <button
                 type="button"
-                className="confirm-delete"
+                className="rc-btn-modal delete"
                 onClick={handleDeleteConfirm}
                 disabled={deleting}
               >
-                {deleting ? 'Deleting...' : 'Delete Resource'}
+                {deleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>

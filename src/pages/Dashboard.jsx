@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCapabilities } from '../context/CapabilityContext';
 import { buildPermissions } from '../utils/permissions';
+import AcademicBadge from '../components/badges/AcademicBadge';
 import './Dashboard.css';
 
 const cards = [
@@ -36,7 +37,7 @@ const cards = [
 ];
 
 export default function Dashboard() {
-  const { capabilities, loading } = useCapabilities();
+  const { capabilities, loading, highestRole } = useCapabilities();
   const permissions = buildPermissions(capabilities);
 
   if (loading) {
@@ -61,6 +62,13 @@ export default function Dashboard() {
         <div className="intro-badge">StudyMate</div>
         <div className="ai-powered-row">
           <span className="ai-powered-badge">AI powered</span>
+          {highestRole && (
+            <AcademicBadge
+              size="md"
+              roleType={highestRole}
+              isOwner={true}
+            />
+          )}
         </div>
         <h1 className="dashboard-hero-title">
           <span className="dashboard-hero-text">Welcome to StudyMate</span>
