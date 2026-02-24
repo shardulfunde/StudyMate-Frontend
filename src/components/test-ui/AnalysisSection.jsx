@@ -8,7 +8,7 @@ function safeList(value) {
 
 export default function AnalysisSection({ analysis, loading, error }) {
   if (loading) {
-    return <AIThinkingState title="Checking your answers..." subtitle="Preparing score, feedback, and next-step recommendations." />;
+    return <AIThinkingState title="Checking your answers..." subtitle="Scoring now, then sharing what to tighten up next." />;
   }
 
   if (error) {
@@ -27,7 +27,7 @@ export default function AnalysisSection({ analysis, loading, error }) {
     const evaluations = safeList(analysis.question_evaluations);
 
     return (
-      <section className="animate-slideDown overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
+      <section className="animate-fadeInUp rounded-lg border border-slate-200 bg-white p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-lg font-semibold text-slate-800">Theory Evaluation</h3>
           <AILabel label="AI Insights" active />
@@ -72,7 +72,7 @@ export default function AnalysisSection({ analysis, loading, error }) {
   const plan = safeList(analysis.detailed_plan_to_improve);
 
   return (
-    <section className="animate-slideDown overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
+    <section className="animate-fadeInUp rounded-lg border border-slate-200 bg-white p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-lg font-semibold text-slate-800">Performance Review</h3>
         <AILabel label="AI Insights" active />

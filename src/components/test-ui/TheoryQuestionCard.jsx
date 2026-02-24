@@ -36,7 +36,8 @@ export default function TheoryQuestionCard({
           disabled={locked}
           rows={7}
           placeholder="Write your answer here..."
-          className="w-full resize-y rounded-xl border border-slate-300 px-4 py-3 text-sm leading-6 text-slate-700 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+          className="max-h-[50vh] min-h-[180px] w-full resize-y overflow-y-auto overscroll-contain rounded-xl border border-slate-300 px-4 py-3 text-sm leading-6 text-slate-700 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+          style={{ WebkitOverflowScrolling: 'touch' }}
         />
       </label>
 

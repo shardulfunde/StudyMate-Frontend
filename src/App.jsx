@@ -12,6 +12,7 @@ import Download from './pages/Download';
 import SubjectPage from './pages/SubjectPage';
 import AdminPanel from './pages/AdminPanel';
 import LandingPage from './pages/LandingPage';
+import AIFeaturesPage from './pages/AIFeaturesPage';
 
 import { useCapabilities } from './context/CapabilityContext';
 import { useToast } from './context/ToastContext';
@@ -74,7 +75,7 @@ function App() {
   if (loading) {
     return (
       <div className="login-loading">
-        <LoadingSpinner message="Initializing StudyMate..." />
+        <LoadingSpinner message="Booting StudyMate. One moment." />
       </div>
     );
   }
@@ -97,6 +98,7 @@ function App() {
         <Route path="/assignments" element={<Assignments />} />
         <Route path="/pyqs" element={<Pyqs />} />
         <Route path="/cognimate" element={<CogniMatePage />} />
+        <Route path="/ai-features" element={<AIFeaturesPage />} />
         <Route path="/download" element={<Download />} />
         <Route path="/subject/:subjectId" element={<SubjectPage />} />
         <Route

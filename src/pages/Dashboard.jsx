@@ -7,24 +7,31 @@ import './Dashboard.css';
 const cards = [
   {
     to: '/notes',
-    icon: '📖',
+    icon: '\u{1F4D6}',
     title: 'Study Notes',
     description: 'Access comprehensive notes for all subjects, organized by topics and chapters.',
     button: 'Browse Notes'
   },
   {
-    to: '/assignments',
-    icon: '📝',
-    title: 'Assignments',
-    description: 'Practice with subject-wise assignments and improve your understanding.',
-    button: 'Coming Soon'
+    to: '/ai-features',
+    icon: '\u2728',
+    title: 'StudyMate AI Studio',
+    description: 'Generate subject-wise and topic-wise tests from one dedicated AI workspace.',
+    button: 'Open Studio'
   },
   {
     to: '/pyqs',
-    icon: '📚',
+    icon: '\u{1F4DA}',
     title: 'Previous Papers',
     description: 'Prepare effectively with previous year question papers and solutions.',
     button: 'View Papers'
+  },
+  {
+    to: '/assignments',
+    icon: '\u{1F4DD}',
+    title: 'Assignments',
+    description: 'Practice with subject-wise assignments and improve your understanding.',
+    button: 'Coming Soon'
   }
 ];
 

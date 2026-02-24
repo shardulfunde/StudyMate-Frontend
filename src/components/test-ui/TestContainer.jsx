@@ -9,7 +9,14 @@ import AILabel from './AILabel';
 import { IntroLoadingSplash } from './SkeletonLoaders';
 
 function StartForm() {
-  const { testConfig, setTestConfig, startTest, isGenerating, ui } = useTestContext();
+  const {
+    testConfig,
+    setTestConfig,
+    startTest,
+    isGenerating,
+    ui,
+    generationStageText
+  } = useTestContext();
 
   const setField = (field, value) => {
     setTestConfig((prev) => ({ ...prev, [field]: value }));
@@ -21,7 +28,7 @@ function StartForm() {
   };
 
   if (isGenerating) {
-    return <IntroLoadingSplash />;
+    return <IntroLoadingSplash stageText={generationStageText} />;
   }
 
   return (
@@ -133,6 +140,44 @@ function StartForm() {
   );
 }
 
+function AutoStartFallback({ onRetry, onClose }) {
+  const { isGenerating, ui, generationStageText } = useTestContext();
+
+  if (isGenerating && !ui.startError) {
+    return <IntroLoadingSplash stageText={generationStageText} />;
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-xl animate-softPop rounded-2xl border border-slate-200 bg-white p-5 shadow-smcard md:p-6">
+      <h3 className="text-lg font-semibold text-slate-800">Generating Test</h3>
+      {ui.startError ? (
+        <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {ui.startError}
+        </p>
+      ) : (
+        <p className="mt-2 text-sm text-slate-600">Preparing your test...</p>
+      )}
+      <div className="mt-4 flex flex-wrap justify-end gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={isGenerating}
+          className="rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300 disabled:hover:translate-y-0"
+        >
+          {isGenerating ? 'Generating...' : 'Retry Generate'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function formatDuration(totalSeconds) {
   const safe = Math.max(0, Number(totalSeconds) || 0);
   const mins = Math.floor(safe / 60);
@@ -149,14 +194,178 @@ function getGrade(percent) {
   return 'E';
 }
 
+function QuestionReviewSection({
+  isTheoryTest,
+  questions,
+  answers,
+  analysis,
+  getCorrectAnswerIndex,
+  testResult
+}) {
+  const safeQuestions = Array.isArray(questions) ? questions : [];
+  const theoryEvaluations = Array.isArray(analysis?.data?.question_evaluations)
+    ? analysis.data.question_evaluations
+    : [];
+  const theoryEvalMap = theoryEvaluations.reduce((acc, item) => {
+    const index = Number(item?.question_index);
+    if (Number.isFinite(index)) {
+      acc[index] = item;
+    }
+    return acc;
+  }, {});
+  const sourceReferences = Array.isArray(testResult?.random_chunks) ? testResult.random_chunks : [];
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-smcard md:p-5">
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Question Review</h3>
+        <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+          {safeQuestions.length} questions
+        </span>
+      </div>
+
+      <div className="space-y-3">
+        {safeQuestions.map((question, index) => {
+          if (isTheoryTest) {
+            const evaluation = theoryEvalMap[index];
+            const studentAnswer = String(answers?.[index] ?? '').trim();
+            const referenceAnswer = question?.answer || 'Unavailable';
+            const marks = Number(question?.marks) || 0;
+
+            return (
+              <article key={`${question?.question || ''}-${index}`} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h4 className="text-sm font-semibold text-slate-800">Q{index + 1}. {question?.question || 'Unavailable'}</h4>
+                  <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 font-semibold text-amber-700">
+                      {marks} marks
+                    </span>
+                    <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 font-medium text-slate-600">
+                      {question?.concept || 'General'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-3 space-y-2 text-sm">
+                  <div>
+                    <p className="font-semibold text-slate-700">Your answer</p>
+                    <p className="mt-1 whitespace-pre-line text-slate-600">{studentAnswer || 'Not answered'}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-700">Reference answer</p>
+                    <p className="mt-1 whitespace-pre-line text-slate-600">{referenceAnswer}</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-md border border-slate-200 bg-white p-2.5 text-sm">
+                  <p className="font-semibold text-slate-700">
+                    Marks awarded: {Number(evaluation?.marks_awarded) || 0}
+                  </p>
+                  <p className="mt-1 whitespace-pre-line text-slate-600">
+                    {evaluation?.feedback || 'Unavailable'}
+                  </p>
+                </div>
+              </article>
+            );
+          }
+
+          const options = Array.isArray(question?.options) ? question.options : [];
+          const selectedIndex = Number.isFinite(Number(answers?.[index])) ? Number(answers?.[index]) : -1;
+          const correctIndex = getCorrectAnswerIndex(question);
+          const selectedText = selectedIndex >= 0 && selectedIndex < options.length
+            ? options[selectedIndex]
+            : 'Not answered';
+          const correctText = correctIndex >= 0 && correctIndex < options.length
+            ? options[correctIndex]
+            : 'Unavailable';
+          const explanation = question?.explanation || 'No explanation available.';
+
+          return (
+            <article key={`${question?.question_text || ''}-${index}`} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <h4 className="text-sm font-semibold text-slate-800">Q{index + 1}. {question?.question_text || 'Unavailable'}</h4>
+
+              <div className="mt-3 space-y-2">
+                {options.map((option, optionIndex) => {
+                  const isSelected = optionIndex === selectedIndex;
+                  const isCorrect = optionIndex === correctIndex;
+                  const isWrongSelection = isSelected && !isCorrect;
+                  const optionStyles = [
+                    'rounded-md border px-3 py-2 text-sm',
+                    isSelected ? 'border-blue-300 bg-blue-50 text-blue-800' : 'border-slate-200 bg-white text-slate-700',
+                    isCorrect ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : '',
+                    isWrongSelection ? 'border-rose-300 bg-rose-50 text-rose-800' : ''
+                  ].join(' ');
+
+                  return (
+                    <div key={`${option}-${optionIndex}`} className={optionStyles}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span>{option}</span>
+                        <div className="flex items-center gap-1">
+                          {isCorrect && (
+                            <span className="rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                              Correct
+                            </span>
+                          )}
+                          {isWrongSelection && (
+                            <span className="rounded-full border border-rose-200 bg-rose-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-700">
+                              Your Choice
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3 grid gap-2 text-sm md:grid-cols-2">
+                <p className="rounded-md border border-slate-200 bg-white px-3 py-2 text-slate-700">
+                  <span className="font-semibold">Your answer: </span>
+                  {selectedText}
+                </p>
+                <p className="rounded-md border border-slate-200 bg-white px-3 py-2 text-slate-700">
+                  <span className="font-semibold">Correct answer: </span>
+                  {correctText}
+                </p>
+              </div>
+
+              <div className="mt-3 rounded-md border border-slate-200 bg-white p-2.5 text-sm">
+                <p className="font-semibold text-slate-700">Explanation</p>
+                <p className="mt-1 text-slate-600">{explanation}</p>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      {isTheoryTest && sourceReferences.length > 0 && (
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Source References</h4>
+          <div className="mt-2 space-y-2">
+            {sourceReferences.map((chunk, idx) => (
+              <p key={`${chunk}-${idx}`} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
+                {chunk || 'Unavailable'}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ResultScreen({
   isTheoryTest,
+  questions,
+  answers,
   score,
   totalQuestions,
   answeredCount,
   timerSeconds,
   isAiBusy,
   analysis,
+  getCorrectAnswerIndex,
+  testResult,
   onRetakeTest,
   onBackSubject
 }) {
@@ -190,7 +399,10 @@ function ResultScreen({
   }, [finalPercent]);
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-50 px-4 py-4 md:px-6 md:py-6">
+    <div
+      className="flex-1 overflow-y-auto overscroll-contain bg-slate-50 px-3 py-3 touch-pan-y md:px-6 md:py-6"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
       <div className="mx-auto grid w-full max-w-6xl animate-softPop gap-4 md:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-smcard md:sticky md:top-3 md:h-fit">
           <div className="flex items-center justify-between">
@@ -269,22 +481,33 @@ function ResultScreen({
           </div>
         </aside>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-smcard md:p-5">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">AI-Powered Analysis</h3>
-            <AILabel label="AI Insights" active={analysis.loading} />
-          </div>
-          {!analysis.loading && !analysis.data && !analysis.error && (
-            <p className="text-sm text-slate-600">Preparing AI analysis...</p>
-          )}
-          <AnalysisSection analysis={analysis.data} loading={analysis.loading} error={analysis.error} />
-        </section>
+        <div className="space-y-4">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-smcard md:p-5">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">AI-Powered Analysis</h3>
+              <AILabel label="AI Insights" active={analysis.loading} />
+            </div>
+            {!analysis.loading && !analysis.data && !analysis.error && (
+              <p className="text-sm text-slate-600">Preparing AI analysis...</p>
+            )}
+            <AnalysisSection analysis={analysis.data} loading={analysis.loading} error={analysis.error} />
+          </section>
+
+          <QuestionReviewSection
+            isTheoryTest={isTheoryTest}
+            questions={questions}
+            answers={answers}
+            analysis={analysis}
+            getCorrectAnswerIndex={getCorrectAnswerIndex}
+            testResult={testResult}
+          />
+        </div>
       </div>
     </div>
   );
 }
 
-function TestBody({ onBackSubject }) {
+function TestBody({ onBackSubject, autoStartOnOpen = false }) {
   const {
     isTheoryTest,
     questions,
@@ -294,6 +517,7 @@ function TestBody({ onBackSubject }) {
     currentQuestionIndex,
     submitted,
     analysis,
+    testResult,
     ui,
     setAnswer,
     requestSubmit,
@@ -302,7 +526,8 @@ function TestBody({ onBackSubject }) {
     totalQuestions,
     isAiBusy,
     resetTestState,
-    getCorrectAnswerIndex
+    getCorrectAnswerIndex,
+    startTest
   } = useTestContext();
   const questionRefs = useRef([]);
   const title = isTheoryTest ? 'Theory Test' : 'MCQ Test';
@@ -316,19 +541,34 @@ function TestBody({ onBackSubject }) {
   }, [currentQuestionIndex]);
 
   if (!totalQuestions) {
-    return <StartForm />;
+    return (
+      <div
+        className="flex-1 overflow-y-auto overscroll-contain bg-slate-50 px-3 py-3 touch-pan-y md:px-6 md:py-6"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        {autoStartOnOpen ? (
+          <AutoStartFallback onRetry={startTest} onClose={onBackSubject} />
+        ) : (
+          <StartForm />
+        )}
+      </div>
+    );
   }
 
   if (submitted) {
     return (
       <ResultScreen
         isTheoryTest={isTheoryTest}
+        questions={questions}
+        answers={answers}
         score={score}
         totalQuestions={totalQuestions}
         answeredCount={Object.values(answeredMap || {}).filter(Boolean).length}
         timerSeconds={timerSeconds}
         isAiBusy={isAiBusy}
         analysis={analysis}
+        getCorrectAnswerIndex={getCorrectAnswerIndex}
+        testResult={testResult}
         onRetakeTest={resetTestState}
         onBackSubject={onBackSubject}
       />
@@ -349,7 +589,10 @@ function TestBody({ onBackSubject }) {
         paperMode
       />
 
-      <div className="flex-1 space-y-4 overflow-y-auto p-4 md:p-6">
+      <div
+        className="flex-1 space-y-4 overflow-y-auto overscroll-contain p-3 touch-pan-y md:p-6"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         <div className="mx-auto w-full max-w-4xl space-y-4">
           {questions.map((question, index) => (
             <section
@@ -387,13 +630,13 @@ function TestBody({ onBackSubject }) {
       </div>
 
       {!submitted && (
-        <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white px-4 py-3 md:px-6">
+        <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white/95 px-3 py-3 backdrop-blur md:px-6">
           {ui.submitWarning && (
             <p className="mx-auto mb-2 w-full max-w-4xl animate-fadeInUp rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
               {ui.submitWarning}
             </p>
           )}
-          <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
+          <div className="mx-auto flex w-full max-w-4xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-slate-600">
               Answered: <strong>{answeredCount}</strong> / {totalQuestions}
               {unansweredCount > 0 && <span className="ml-2 text-amber-700">({unansweredCount} remaining)</span>}
@@ -401,7 +644,7 @@ function TestBody({ onBackSubject }) {
             <button
               type="button"
               onClick={requestSubmit}
-              className="rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+              className="w-full rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 sm:w-auto"
             >
               {isTheoryTest ? 'Evaluate Test' : 'Submit Test'}
             </button>
@@ -412,23 +655,63 @@ function TestBody({ onBackSubject }) {
   );
 }
 
-function TestContainerInner({ isOpen, onClose, title }) {
-  const { ui, closeConfirm, confirmSubmit, resetTestState, isGenerating, analysis, isTheoryTest } = useTestContext();
+function TestContainerInner({ isOpen, onClose, title, autoStartOnOpen = false }) {
+  const {
+    ui,
+    closeConfirm,
+    confirmSubmit,
+    resetTestState,
+    isGenerating,
+    analysis,
+    isTheoryTest,
+    startTest,
+    totalQuestions,
+    submitted
+  } = useTestContext();
   const isBusy = isGenerating || analysis.loading;
+  const autoStartedRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen) {
+      autoStartedRef.current = false;
       resetTestState();
     }
   }, [isOpen, resetTestState]);
+
+  useEffect(() => {
+    if (!isOpen || !autoStartOnOpen) return;
+    if (autoStartedRef.current) return;
+    if (totalQuestions > 0 || submitted || isGenerating) return;
+
+    autoStartedRef.current = true;
+    void startTest();
+  }, [autoStartOnOpen, isGenerating, isOpen, startTest, submitted, totalQuestions]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevBodyTouchAction = document.body.style.touchAction;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.body.style.touchAction = prevBodyTouchAction;
+      document.documentElement.style.overflow = prevHtmlOverflow;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
     <>
-      <div className="fixed inset-0 z-[12050] bg-slate-900/55 p-2 md:p-6" onClick={() => !isBusy && onClose()}>
+      <div className="fixed inset-0 z-[12050] overflow-hidden bg-slate-900/55 p-1.5 md:p-6" onClick={() => !isBusy && onClose()}>
         <div
-          className="mx-auto flex h-full w-full max-w-7xl animate-softPop flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
+          className="mx-auto flex h-[100dvh] w-full max-w-7xl animate-softPop flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl md:h-full"
           onClick={(event) => event.stopPropagation()}
         >
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 md:px-6">
@@ -443,7 +726,10 @@ function TestContainerInner({ isOpen, onClose, title }) {
             </button>
           </div>
 
-          <TestBody onBackSubject={() => !isBusy && onClose()} />
+          <TestBody
+            onBackSubject={() => !isBusy && onClose()}
+            autoStartOnOpen={autoStartOnOpen}
+          />
         </div>
       </div>
 
@@ -457,10 +743,23 @@ function TestContainerInner({ isOpen, onClose, title }) {
   );
 }
 
-export default function TestContainer({ isOpen, onClose, scopeId, scopeTarget = 'resource', title }) {
+export default function TestContainer({
+  isOpen,
+  onClose,
+  scopeId,
+  scopeTarget = 'resource',
+  title,
+  initialConfig = null,
+  autoStartOnOpen = false
+}) {
   return (
-    <TestProvider scopeId={scopeId} scopeTarget={scopeTarget}>
-      <TestContainerInner isOpen={isOpen} onClose={onClose} title={title} />
+    <TestProvider scopeId={scopeId} scopeTarget={scopeTarget} initialConfig={initialConfig}>
+      <TestContainerInner
+        isOpen={isOpen}
+        onClose={onClose}
+        title={title}
+        autoStartOnOpen={autoStartOnOpen}
+      />
     </TestProvider>
   );
 }

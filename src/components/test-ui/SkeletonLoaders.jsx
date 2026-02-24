@@ -34,7 +34,7 @@ export function TestQuestionSkeleton() {
   );
 }
 
-export function AIThinkingState({ title = 'AI thinking', subtitle = 'Analyzing your answers and patterns...' }) {
+export function AIThinkingState({ title = 'Taking a close look', subtitle = 'Reviewing answers and pulling out clear next steps.' }) {
   return (
     <section className="animate-fadeInUp rounded-xl border border-blue-200 bg-blue-50/70 p-5">
       <div className="mb-3 flex items-center justify-between">
@@ -54,18 +54,21 @@ export function AIThinkingState({ title = 'AI thinking', subtitle = 'Analyzing y
   );
 }
 
-export function IntroLoadingSplash() {
+export function IntroLoadingSplash({ stageText = 'Structuring...' }) {
   return (
     <section className="animate-fadeInUp rounded-xl border border-slate-200 bg-white p-6 shadow-smcard">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-800">Preparing your test</h3>
+        <h3 className="text-lg font-semibold text-slate-800">Putting your test together</h3>
         <AILabel label="AI Powered" active />
       </div>
-      <p className="text-sm text-slate-600">Generating contextual MCQs and balancing difficulty for you.</p>
+      <p className="text-sm text-slate-600">Quietly cooking up a clean paper.</p>
+      <p className="mt-2 text-xs font-medium tracking-wide text-slate-500">{stageText}</p>
+
       <div className="mt-5 grid gap-3">
-        <SkeletonBlock className="h-11 w-full rounded-xl" />
-        <SkeletonBlock className="h-11 w-full rounded-xl" />
-        <SkeletonBlock className="h-11 w-full rounded-xl" />
+        <SkeletonBlock className="h-9 w-full rounded-xl" />
+        <SkeletonBlock className="h-9 w-full rounded-xl" />
+        <SkeletonBlock className="h-9 w-11/12 rounded-xl" />
+        <SkeletonBlock className="h-9 w-10/12 rounded-xl" />
       </div>
     </section>
   );

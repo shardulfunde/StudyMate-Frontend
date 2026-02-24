@@ -4,6 +4,7 @@ import { api, generateEmbeddings } from '../services/api';
 import ResourceCard from '../components/ResourceCard';
 import Skeleton from '../components/Skeleton';
 import UploadModal from '../components/UploadModal';
+import TestContainer from '../components/test-ui/TestContainer';
 import { useCapabilities } from '../context/CapabilityContext';
 import { useToast } from '../context/ToastContext';
 import { buildPermissions } from '../utils/permissions';
@@ -22,6 +23,7 @@ export default function SubjectPage() {
   const [canUpload, setCanUpload] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [subjectTestOpen, setSubjectTestOpen] = useState(false);
 
   const subjectKey = useMemo(
     () => (subjectId ? String(subjectId) : null),
@@ -134,11 +136,23 @@ export default function SubjectPage() {
     <div className="subject-page">
       <div className="subject-page-header">
         <h1>{subjectMeta?.subject ? `${subjectMeta.subject} Resources` : 'Subject Resources'}</h1>
-        {canUpload && (
-          <button type="button" className="btn-upload" onClick={() => setUploadOpen(true)}>
-            Upload resource
+        <div className="subject-page-actions">
+          <button
+            type="button"
+            className="btn-generate-subject-test"
+            onClick={() => setSubjectTestOpen(true)}
+            disabled={loading || !subjectId}
+            title={loading ? 'Please wait for resources to load' : 'Generate test from this subject'}
+          >
+            Generate Subject Test
           </button>
-        )}
+
+          {canUpload && (
+            <button type="button" className="btn-upload" onClick={() => setUploadOpen(true)}>
+              Upload resource
+            </button>
+          )}
+        </div>
       </div>
 
       {loading && <Skeleton cardCount={6} columns={3} />}
@@ -171,6 +185,14 @@ export default function SubjectPage() {
           onDone={handleUploadDone}
         />
       )}
+
+      <TestContainer
+        isOpen={subjectTestOpen}
+        onClose={() => setSubjectTestOpen(false)}
+        scopeId={subjectId}
+        scopeTarget="subject"
+        title={`Test: ${subjectMeta?.subject || 'Subject'}`}
+      />
     </div>
   );
 }

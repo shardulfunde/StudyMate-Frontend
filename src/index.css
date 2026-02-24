@@ -16,6 +16,13 @@ html, body, #root {
   padding: 0;
 }
 
+@layer utilities {
+  .bg-shimmer {
+    background: linear-gradient(100deg, #e2e8f0 20%, #f8fafc 40%, #e2e8f0 60%);
+    background-size: 220% 100%;
+  }
+}
+
 /* LOADING */
 .login-loading {
   height: 100vh;

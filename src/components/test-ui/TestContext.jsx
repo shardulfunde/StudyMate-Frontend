@@ -27,6 +27,8 @@ const DEFAULT_SCORE = {
   awardedMarks: 0,
   totalMarks: 0
 };
+const GENERATION_STAGES = ['Structuring...', 'Balancing...', 'Finalizing...'];
+const MOMENTUM_STORAGE_KEY = 'studymate_test_generation_count';
 
 function getCorrectAnswerIndex(question) {
   const answer = Number(question?.correct_answer);
@@ -46,6 +48,19 @@ function clampQuestionCount(value) {
   return Math.min(MAX_QUESTIONS, Math.max(MIN_QUESTIONS, Math.trunc(parsed)));
 }
 
+function normalizeInitialConfig(initialConfig = {}) {
+  const merged = { ...DEFAULT_CONFIG, ...(initialConfig || {}) };
+
+  return {
+    testType: merged.testType === 'theory' ? 'theory' : 'mcq',
+    mode: merged.mode === 'relevant' ? 'relevant' : 'random',
+    numberOfQuestions: clampQuestionCount(merged.numberOfQuestions),
+    difficulty: merged.difficulty || DEFAULT_CONFIG.difficulty,
+    language: merged.language || DEFAULT_CONFIG.language,
+    query: String(merged.query || '')
+  };
+}
+
 function resolveQuestions(testResult, testType) {
   if (!testResult) return [];
   if (testType === 'theory') return testResult?.theory_test?.questions || [];
@@ -59,10 +74,11 @@ function isAnsweredValue(value, testType) {
   return value !== undefined;
 }
 
-export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
+export function TestProvider({ children, scopeId, scopeTarget = 'resource', initialConfig = null }) {
   const { showToast } = useToast();
-  const [testConfig, setTestConfig] = useState(DEFAULT_CONFIG);
-  const [activeTestType, setActiveTestType] = useState(DEFAULT_CONFIG.testType);
+  const defaultConfig = useMemo(() => normalizeInitialConfig(initialConfig), [initialConfig]);
+  const [testConfig, setTestConfig] = useState(defaultConfig);
+  const [activeTestType, setActiveTestType] = useState(defaultConfig.testType);
   const [testResult, setTestResult] = useState(null);
   const [answers, setAnswers] = useState({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -84,6 +100,7 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
     startError: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStageIndex, setGenerationStageIndex] = useState(0);
 
   const isTheoryTest = activeTestType === 'theory';
   const questions = useMemo(() => resolveQuestions(testResult, activeTestType), [testResult, activeTestType]);
@@ -103,8 +120,8 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
   );
 
   const resetTestState = useCallback(() => {
-    setTestConfig(DEFAULT_CONFIG);
-    setActiveTestType(DEFAULT_CONFIG.testType);
+    setTestConfig(defaultConfig);
+    setActiveTestType(defaultConfig.testType);
     setTestResult(null);
     setAnswers({});
     setCurrentQuestionIndex(0);
@@ -116,7 +133,14 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
     setAnalysis({ data: null, loading: false, error: '', visible: false });
     setUi({ submitWarning: '', confirmOpen: false, sidebarOpenMobile: false, startError: '' });
     setIsGenerating(false);
-  }, []);
+    setGenerationStageIndex(0);
+  }, [defaultConfig]);
+
+  useEffect(() => {
+    if (testResult || submitted) return;
+    setTestConfig(defaultConfig);
+    setActiveTestType(defaultConfig.testType);
+  }, [defaultConfig, submitted, testResult]);
 
   useEffect(() => {
     if (!testResult || submitted) return undefined;
@@ -137,6 +161,20 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
       submitWarning: 'Timer finished. Submit now to view your result screen.'
     }));
   }, [submitted, testResult, timerSeconds]);
+
+  useEffect(() => {
+    if (!isGenerating) return undefined;
+
+    setGenerationStageIndex(0);
+
+    const stageInterval = setInterval(() => {
+      setGenerationStageIndex((prev) => Math.min(prev + 1, GENERATION_STAGES.length - 1));
+    }, 1200);
+
+    return () => {
+      clearInterval(stageInterval);
+    };
+  }, [isGenerating]);
 
   const startTest = useCallback(async () => {
     if (!scopeId) {
@@ -164,6 +202,7 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
     }
 
     setIsGenerating(true);
+    setGenerationStageIndex(0);
     setUi((prev) => ({ ...prev, startError: '', submitWarning: '' }));
     setAnalysis({ data: null, loading: false, error: '', visible: false });
 
@@ -183,7 +222,16 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
       setSubmitted(false);
       setScore(DEFAULT_SCORE);
       setTimerSeconds(getInitialTimer(generatedQuestions.length));
+      setGenerationStageIndex(GENERATION_STAGES.length - 1);
+
+      const previousCount = Number(window.localStorage.getItem(MOMENTUM_STORAGE_KEY) || 0);
+      const nextCount = Number.isFinite(previousCount) ? previousCount + 1 : 1;
+      window.localStorage.setItem(MOMENTUM_STORAGE_KEY, String(nextCount));
+
       showToast('Test generated successfully', 'success');
+      if (nextCount >= 2 && nextCount % 2 === 0) {
+        showToast("You're building momentum.", 'info', 2200);
+      }
       return true;
     } catch (error) {
       const message = error?.detail?.detail || error?.message || 'Failed to generate test';
@@ -387,6 +435,8 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource' }) {
     analysis,
     ui,
     isGenerating,
+    generationStageIndex,
+    generationStageText: GENERATION_STAGES[generationStageIndex] || GENERATION_STAGES[0],
     isAiBusy,
     answeredCount,
     totalQuestions,

@@ -39,6 +39,7 @@ export default function Layout({ children }) {
           <Link to="/notes" className={location.pathname === '/notes' ? 'active' : ''}>Notes</Link>
           <Link to="/assignments" className={location.pathname === '/assignments' ? 'active' : ''}>Assignments</Link>
           <Link to="/pyqs" className={location.pathname === '/pyqs' ? 'active' : ''}>Previous Papers</Link>
+          <Link to="/ai-features" className={location.pathname === '/ai-features' ? 'active' : ''}>StudyMate AI Studio</Link>
           <Link to="/cognimate" className={location.pathname === '/cognimate' ? 'active' : ''}>CogniMate</Link>
           <Link to="/download" className={location.pathname === '/download' ? 'active' : ''}>Coming Soon</Link>
           {hasAdminAccess && (
