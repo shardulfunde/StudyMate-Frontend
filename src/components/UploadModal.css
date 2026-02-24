@@ -207,6 +207,13 @@
   font-size: 0.95rem;
 }
 
+.upload-review-note {
+  margin-top: 0.45rem !important;
+  font-size: 0.85rem !important;
+  color: #1e3a8a !important;
+  animation: reviewNoteFadeIn 500ms ease 150ms both;
+}
+
 /* The subtle blue circle behind the checkmark */
 .success-icon-wrapper {
   width: 80px;
@@ -280,6 +287,11 @@
 @keyframes successHaloPulse {
   0% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.14); }
   100% { box-shadow: 0 0 0 16px rgba(29, 78, 216, 0); }
+}
+
+@keyframes reviewNoteFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {

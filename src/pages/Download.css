@@ -46,6 +46,15 @@
   color: #0056b3;
 }
 
+.download-button.coming-soon,
+.download-button.coming-soon:hover {
+  background: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
 .features {
   padding: 4rem 2rem;
   background: white;

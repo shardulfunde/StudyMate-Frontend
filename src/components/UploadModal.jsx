@@ -87,7 +87,8 @@ export default function UploadModal({ subjectId, onClose, onDone, resourceType =
               </svg>
             </div>
             <h3>Upload Complete!</h3>
-            <p>Your {resourceType} have been successfully added.</p>
+            <p>Your {resourceType} have been uploaded and sent for moderator review.</p>
+            <p className="upload-review-note">You can access them after approval.</p>
           </div>
         ) : (
           // --- ORIGINAL FORM ---
@@ -95,7 +96,7 @@ export default function UploadModal({ subjectId, onClose, onDone, resourceType =
             <div className="upload-modal-header">
               <div>
                 <h2>Upload Resource</h2>
-                <p className="upload-modal-subtitle">Add a {resourceType} file for this subject.</p>
+                <p className="upload-modal-subtitle">Add a {resourceType} file for this subject. Submissions are reviewed before approval.</p>
               </div>
               <button type="button" className="upload-modal-close" onClick={onClose} disabled={loading}>
                 x

@@ -9,7 +9,7 @@ import './Layout.css';
 
 export default function Layout({ children }) {
   const location = useLocation();
-  const { hasAdminAccess } = useCapabilities();
+  const { hasAdminAccess, isPlatformSuperadmin } = useCapabilities();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -49,6 +49,9 @@ export default function Layout({ children }) {
           <Link to="/download" className={location.pathname === '/download' ? 'active' : ''}>Coming Soon</Link>
           {hasAdminAccess && (
             <Link to="/admin" className={location.pathname === '/admin' ? 'active' : ''}>Admin</Link>
+          )}
+          {isPlatformSuperadmin && (
+            <Link to="/platform/approvals" className={location.pathname === '/platform/approvals' ? 'active' : ''}>Approvals</Link>
           )}
           <button type="button" className="nav-signout" onClick={() => signOut()}>
             Sign out

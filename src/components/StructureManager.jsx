@@ -152,7 +152,10 @@ export default function StructureManager() {
         { adminAction: true }
       );
       setSubjectName('');
-      setMessage({ type: 'success', text: 'Subject created successfully.' });
+      setMessage({
+        type: 'success',
+        text: 'Subject created and submitted for moderator review. It will be available after approval.'
+      });
       await loadStructure();
     } catch (err) {
       setMessage({

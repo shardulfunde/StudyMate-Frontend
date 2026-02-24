@@ -15,6 +15,7 @@ import LandingPage from './pages/LandingPage';
 import AIFeaturesPage from './pages/AIFeaturesPage';
 import ModeratorApplicationPage from './pages/ModeratorApplicationPage';
 import AcademicTeamPage from './pages/AcademicTeamPage';
+import PlatformApprovalsPage from './pages/PlatformApprovalsPage';
 
 import { useCapabilities } from './context/CapabilityContext';
 import { useToast } from './context/ToastContext';
@@ -106,6 +107,16 @@ function App() {
         <Route path="/apply-moderator" element={<ModeratorApplicationPage />} />
         <Route path="/download" element={<Download />} />
         <Route path="/subject/:subjectId" element={<SubjectPage />} />
+        <Route
+          path="/platform/approvals"
+          element={
+            capabilities?.isPlatformSuperadmin ? (
+              <PlatformApprovalsPage />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
         <Route
           path="/admin"
           element={isAdmin ? <AdminPanel /> : <Navigate to="/" replace />}

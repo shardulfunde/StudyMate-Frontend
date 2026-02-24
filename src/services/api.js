@@ -437,6 +437,56 @@ export async function analyzeTheoryTestAxios(payload) {
 }
 
 /**
+ * Platform approvals - resources
+ */
+export async function getPlatformResources(status = 'pending', meta = {}) {
+  const safeStatus = status || 'pending';
+  return api.get(`/platform/resources?status=${encodeURIComponent(safeStatus)}`, meta);
+}
+
+export async function previewPlatformResource(resourceId, meta = {}) {
+  return api.get(`/platform/resources/${resourceId}/preview`, meta);
+}
+
+export async function approvePlatformResource(resourceId, meta = {}) {
+  return api.request(`/platform/resources/${resourceId}/approve`, { method: 'PATCH' }, meta);
+}
+
+export async function rejectPlatformResource(resourceId, rejectionReason, meta = {}) {
+  return api.request(
+    `/platform/resources/${resourceId}/reject`,
+    {
+      method: 'PATCH',
+      body: { rejection_reason: rejectionReason }
+    },
+    meta
+  );
+}
+
+/**
+ * Platform approvals - subjects
+ */
+export async function getPlatformSubjects(status = 'pending', meta = {}) {
+  const safeStatus = status || 'pending';
+  return api.get(`/platform/subjects?status=${encodeURIComponent(safeStatus)}`, meta);
+}
+
+export async function approvePlatformSubject(subjectId, meta = {}) {
+  return api.request(`/platform/subjects/${subjectId}/approve`, { method: 'PATCH' }, meta);
+}
+
+export async function rejectPlatformSubject(subjectId, rejectionReason, meta = {}) {
+  return api.request(
+    `/platform/subjects/${subjectId}/reject`,
+    {
+      method: 'PATCH',
+      body: { rejection_reason: rejectionReason }
+    },
+    meta
+  );
+}
+
+/**
  * @param {{
  *  full_name: string,
  *  phone_number: string,

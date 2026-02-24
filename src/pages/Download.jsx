@@ -1,4 +1,3 @@
-import { STUDYMATE_ANDROID_APK_URL } from '../config';
 import './Download.css';
 
 const ICONS = {
@@ -20,14 +19,9 @@ export default function Download() {
           Access all your study materials on your mobile device and enjoy a better
           learning experience with the StudyMate app.
         </p>
-        <a
-          href={STUDYMATE_ANDROID_APK_URL}
-          className="download-button"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {ICONS.download} Download Now
-        </a>
+        <button type="button" className="download-button coming-soon" disabled>
+          {ICONS.download} Coming Soon
+        </button>
       </section>
 
       <section className="features">
