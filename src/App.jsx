@@ -16,6 +16,7 @@ import AIFeaturesPage from './pages/AIFeaturesPage';
 import ModeratorApplicationPage from './pages/ModeratorApplicationPage';
 import AcademicTeamPage from './pages/AcademicTeamPage';
 import PlatformApprovalsPage from './pages/PlatformApprovalsPage';
+import StudentDealsSurvey from './pages/StudentDealsSurvey';
 
 import { useCapabilities } from './context/CapabilityContext';
 import { useToast } from './context/ToastContext';
@@ -106,6 +107,7 @@ function App() {
         <Route path="/moderator-application" element={<ModeratorApplicationPage />} />
         <Route path="/apply-moderator" element={<ModeratorApplicationPage />} />
         <Route path="/download" element={<Download />} />
+        <Route path="/student-deals-survey" element={<StudentDealsSurvey />} />
         <Route path="/subject/:subjectId" element={<SubjectPage />} />
         <Route
           path="/platform/approvals"
