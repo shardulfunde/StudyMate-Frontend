@@ -6,15 +6,15 @@ export default {
       colors: {
         sm: {
           base: '#FFFFFF',
-          text: '#1F2937',
-          textMuted: '#374151',
-          border: '#E5E7EB',
-          accent: '#2563EB',
-          accentSoft: '#DBEAFE'
+          text: '#0f172a',
+          textMuted: '#475569',
+          border: '#e2e8f0',
+          accent: '#2563eb',
+          accentSoft: '#dbeafe'
         }
       },
       boxShadow: {
-        smcard: '0 10px 30px rgba(15, 23, 42, 0.08)'
+        smcard: '0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.06)'
       },
       keyframes: {
         fadeInUp: {

@@ -17,6 +17,8 @@ export default function PDFViewer({
 
   // Close on Escape key
   useEffect(() => {
+    document.body.classList.add('pdf-viewer-open');
+
     const handleEsc = (e) => {
       if (e.key !== 'Escape') return;
       if (document.fullscreenElement) {
@@ -26,7 +28,10 @@ export default function PDFViewer({
       onClose();
     };
     window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    return () => {
+      document.body.classList.remove('pdf-viewer-open');
+      window.removeEventListener('keydown', handleEsc);
+    };
   }, [onClose]);
 
   useEffect(() => {

@@ -5,6 +5,8 @@ import { useCapabilities } from '../context/CapabilityContext';
 import Footer from './Footer';
 import Chatbot from './Chatbot';
 import Onboarding from './Onboarding';
+import { StudyMateShapesBackground } from './ui/ShapeLandingHero';
+import TextPressure from './ui/TextPressure';
 import './Layout.css';
 
 export default function Layout({ children }) {
@@ -18,9 +20,26 @@ export default function Layout({ children }) {
 
   return (
     <div className="layout">
+      <StudyMateShapesBackground className="layout-shapes-bg" />
       <nav className="navbar">
         <div className="navbar-top-row">
-          <Link to="/" className="logo"><span aria-hidden="true">{'\u{1F4DA}'}</span> StudyMate</Link>
+          <Link to="/" className="logo">
+            <span className="logo-mark" aria-hidden="true">{'\u{1F4DA}'}</span>
+            <span className="logo-pressure" aria-label="StudyMate">
+              <TextPressure
+                text="StudyMate"
+                textColor="#0f172a"
+                strokeColor="#fb3a5d"
+                minFontSize={20}
+                flex={false}
+                alpha={false}
+                stroke={false}
+                width
+                weight
+                italic
+              />
+            </span>
+          </Link>
           <button
             type="button"
             className={`mobile-menu-btn${mobileMenuOpen ? ' is-open' : ''}`}

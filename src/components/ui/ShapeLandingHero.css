@@ -1,0 +1,160 @@
+.studymate-shapes-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(37, 99, 235, 0.22), transparent 32%),
+    radial-gradient(circle at 80% 70%, rgba(251, 58, 93, 0.18), transparent 30%),
+    #f8fafc;
+}
+
+.studymate-shapes-glow {
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), transparent 45%, rgba(251, 58, 93, 0.14));
+  filter: blur(48px);
+}
+
+.studymate-shapes-field,
+.studymate-shapes-vignette {
+  position: absolute;
+  inset: 0;
+}
+
+.studymate-shapes-vignette {
+  background:
+    linear-gradient(to bottom, rgba(248, 250, 252, 0.35), transparent 30%, rgba(248, 250, 252, 0.58)),
+    radial-gradient(circle at 50% 50%, transparent 0%, rgba(248, 250, 252, 0.26) 78%);
+}
+
+.elegant-shape {
+  position: absolute;
+}
+
+.elegant-shape-inner {
+  position: relative;
+}
+
+.elegant-shape-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--shape-color), transparent 80%);
+  box-shadow:
+    0 10px 36px rgba(37, 99, 235, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.elegant-shape-inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.32), transparent 70%);
+}
+
+.shape-one {
+  left: -10%;
+  top: 14%;
+}
+
+.shape-two {
+  right: -6%;
+  top: 68%;
+}
+
+.shape-three {
+  left: 8%;
+  bottom: 8%;
+}
+
+.shape-four {
+  right: 18%;
+  top: 10%;
+}
+
+.shape-five {
+  left: 24%;
+  top: 4%;
+}
+
+.hero-geometric {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.hero-geometric-content {
+  position: relative;
+  z-index: 1;
+  width: min(900px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 160px 0;
+  text-align: center;
+}
+
+.hero-geometric-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.54);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+.hero-geometric-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #fb3a5d;
+}
+
+.hero-geometric h1 {
+  margin: 28px 0 16px;
+  color: var(--text-primary);
+  font-size: clamp(2.75rem, 7vw, 6rem);
+  line-height: 0.96;
+  font-weight: 800;
+}
+
+.hero-geometric h1 span {
+  display: block;
+}
+
+.hero-geometric h1 span:last-child {
+  background: linear-gradient(90deg, var(--primary), #0f172a 45%, #fb3a5d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-geometric p {
+  max-width: 620px;
+  margin: 0 auto;
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .shape-one {
+    left: -34%;
+  }
+
+  .shape-two {
+    right: -32%;
+  }
+
+  .hero-geometric-content {
+    padding: 120px 0;
+  }
+}

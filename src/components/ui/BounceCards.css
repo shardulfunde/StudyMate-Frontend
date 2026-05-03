@@ -1,0 +1,47 @@
+.bounce-cards-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.bounce-card {
+  position: absolute;
+  width: 190px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 5px solid rgba(255, 255, 255, 0.92);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.14),
+    0 2px 6px rgba(37, 99, 235, 0.08);
+  will-change: transform;
+}
+
+.bounce-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.02), rgba(251, 58, 93, 0.16));
+  pointer-events: none;
+}
+
+.bounce-card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 640px) {
+  .bounce-cards-container {
+    transform: scale(0.78);
+    transform-origin: center;
+  }
+
+  .bounce-card {
+    width: 170px;
+  }
+}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import LoadingSpinner from './components/LoadingSpinner';
+import GooeyLoader from './components/ui/GooeyLoader';
 
 import Dashboard from './pages/Dashboard';
 import Notes from './pages/Notes';
@@ -17,6 +17,7 @@ import ModeratorApplicationPage from './pages/ModeratorApplicationPage';
 import AcademicTeamPage from './pages/AcademicTeamPage';
 import PlatformApprovalsPage from './pages/PlatformApprovalsPage';
 import StudentDealsSurvey from './pages/StudentDealsSurvey';
+import NotFoundPage from './pages/NotFoundPage';
 
 import { useCapabilities } from './context/CapabilityContext';
 import { useToast } from './context/ToastContext';
@@ -79,7 +80,12 @@ function App() {
   if (loading) {
     return (
       <div className="login-loading">
-        <LoadingSpinner message="Booting StudyMate. One moment." />
+        <GooeyLoader
+          primaryColor="#fb3a5d"
+          secondaryColor="#93c5fd"
+          borderColor="#e2e8f0"
+          message="Booting StudyMate. One moment."
+        />
       </div>
     );
   }
@@ -123,7 +129,7 @@ function App() {
           path="/admin"
           element={isAdmin ? <AdminPanel /> : <Navigate to="/" replace />}
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>
   );

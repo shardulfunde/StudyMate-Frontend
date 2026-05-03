@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCapabilities } from '../context/CapabilityContext';
 import { buildPermissions } from '../utils/permissions';
 import AcademicBadge from '../components/badges/AcademicBadge';
+import FuzzyText from '../components/ui/FuzzyText';
 import './Dashboard.css';
 
 const cards = [
@@ -71,7 +72,24 @@ export default function Dashboard() {
           )}
         </div>
         <h1 className="dashboard-hero-title">
-          <span className="dashboard-hero-text">Welcome to StudyMate</span>
+          <span className="dashboard-hero-text">
+            <FuzzyText
+              baseIntensity={0.12}
+              hoverIntensity={0.32}
+              enableHover
+              fontSize="clamp(2.25rem, 4.8vw, 4rem)"
+              fontWeight={900}
+              fontFamily="Inter, system-ui, sans-serif"
+              gradient={['#0f172a', '#2563eb', '#fb3a5d']}
+              fuzzRange={18}
+              fps={45}
+              transitionDuration={160}
+              direction="horizontal"
+              className="dashboard-fuzzy-heading"
+            >
+              Welcome to StudyMate
+            </FuzzyText>
+          </span>
         </h1>
         <p>Find notes, assignments, and previous year papers in one clean workspace.</p>
       </section>

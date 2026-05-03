@@ -1,23 +1,27 @@
 .onboard-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 25, 47, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1200;
+  position: fixed; inset: 0; background: rgba(15,23,42,0.5);
+  display: flex; align-items: center; justify-content: center; z-index: 1200;
 }
 .onboard-card {
-  background: #fff;
-  padding: 20px 22px;
-  border-radius: 10px;
-  width: 92%;
-  max-width: 520px;
-  box-shadow: 0 8px 30px rgba(2,6,23,0.25);
+  background: var(--card); padding: 20px 22px; border-radius: var(--radius-lg);
+  width: 92%; max-width: 480px; box-shadow: var(--shadow-lg); border: 1px solid var(--border);
 }
-.onboard-card h2 { margin: 0 0 8px; color: #0b5ed7 }
-.onboard-card p { margin: 0 0 18px; color: #243447 }
-.onboard-controls { display:flex; justify-content:space-between; gap:12px; align-items:center }
-.btn-primary { background:#0b5ed7; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer }
-.btn-secondary { background:transparent; color:#0b5ed7; border:1px solid #cfe0ff; padding:8px 12px; border-radius:6px; cursor:pointer }
-.btn-link { background:transparent; color:#6c757d; border:none; padding:8px 10px; cursor:pointer }
+.onboard-card h2 { margin: 0 0 6px; color: var(--primary); font-size: 1.125rem; }
+.onboard-card p { margin: 0 0 16px; color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+.onboard-controls { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.btn-primary {
+  background: var(--primary); color: #fff; border: none; padding: 8px 14px;
+  border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.8125rem;
+  transition: background 150ms ease;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary {
+  background: transparent; color: var(--primary); border: 1px solid var(--border);
+  padding: 8px 14px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.8125rem;
+}
+.btn-secondary:hover { background: var(--primary-soft); }
+.btn-link {
+  background: transparent; color: var(--text-tertiary); border: none;
+  padding: 8px 10px; cursor: pointer; font-size: 0.8125rem;
+}
+.btn-link:hover { color: var(--text-secondary); }

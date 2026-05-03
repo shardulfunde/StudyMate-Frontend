@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import './Notes.css';
 import Skeleton from '../components/Skeleton';
+import PixelBlast from '../components/ui/PixelBlast';
 
 const STEP = { PROGRAM: 1, YEAR: 2, SUBJECT: 3 };
 const SUBJECT_ICONS = ['📚', '⚡', '🔌', '🤖', '📐', '⚙️', '🧪', '📡', '🧠', '🖥️', '📊', '📝', '📎', '💡', '🔍', '🧾'];
@@ -206,8 +207,27 @@ export default function Pyqs() {
   return (
     <>
       <header className="page-header">
-        <h1>Previous Year Questions</h1>
-        <p>Access PYQs by following Program - Year - Subject for a cleaner browsing flow.</p>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+          <PixelBlast
+            variant="circle"
+            pixelSize={6}
+            color="#1e3a8a"
+            patternScale={3}
+            patternDensity={1.2}
+            pixelSizeJitter={0.5}
+            enableRipples={true}
+            rippleSpeed={0.4}
+            rippleThickness={0.12}
+            rippleIntensityScale={1.5}
+            speed={0.6}
+            edgeFade={0.25}
+            transparent={true}
+          />
+        </div>
+        <div style={{ position: 'relative', zIndex: 1, pointerEvents: 'none' }}>
+          <h1>Previous Year Questions</h1>
+          <p>Access PYQs by following Program - Year - Subject for a cleaner browsing flow.</p>
+        </div>
       </header>
 
       <div className="notes-breadcrumb">

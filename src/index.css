@@ -1,19 +1,86 @@
-/* BASE */
+/* ─── DESIGN TOKENS ─── */
+:root {
+  /* Backgrounds */
+  --bg: #f8fafc;
+  --card: #ffffff;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+
+  /* Primary (Blue) — buttons, links, active states */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-soft: #dbeafe;
+  --primary-ring: rgba(37, 99, 235, 0.15);
+
+  /* Accent (Green) — AI labels, success, highlights */
+  --accent: #22c55e;
+  --accent-hover: #16a34a;
+  --accent-soft: #dcfce7;
+
+  /* Borders */
+  --border: #e2e8f0;
+  --border-hover: #cbd5e1;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 1px 3px rgba(0, 0, 0, 0.06), 0 16px 40px rgba(0, 0, 0, 0.08);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+
+  /* Focus */
+  --focus-ring: 0 0 0 3px var(--primary-ring);
+
+  /* Error */
+  --error: #dc2626;
+  --error-soft: #fef2f2;
+  --error-border: #fecaca;
+}
+
+/* ─── BASE ─── */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html, body, #root {
   height: 100%;
-  font-family: Inter, sans-serif;
-  background: #fafafa;
-  color: #1f2937;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+select {
+  min-height: 40px;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-tertiary) 50%),
+    linear-gradient(135deg, var(--text-tertiary) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2.25rem;
+}
+
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 @layer utilities {
@@ -23,15 +90,18 @@ html, body, #root {
   }
 }
 
-/* LOADING */
+/* ─── LOADING ─── */
 .login-loading {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(251, 58, 93, 0.08), transparent 34%),
+    var(--bg);
 }
 
-/* LOGIN PAGE */
+/* ─── LOGIN PAGE ─── */
 .login-page {
   height: 100vh;
   display: flex;
@@ -39,58 +109,62 @@ html, body, #root {
   justify-content: center;
 }
 
-/* LOGIN CARD */
+/* ─── LOGIN CARD ─── */
 .login-card {
   width: 100%;
   max-width: 380px;
   padding: 48px 32px;
   text-align: center;
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 16px 36px rgba(0,0,0,0.06);
-  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
 }
 
-/* BRAND */
+/* ─── BRAND ─── */
 .login-brand {
-  font-size: 2.2rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 12px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
 }
 
-/* TAGLINE */
+/* ─── TAGLINE ─── */
 .login-tagline {
-  font-size: 0.95rem;
-  color: #4b5563;
-  margin-bottom: 28px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
   line-height: 1.5;
 }
 
-/* BUTTON */
+/* ─── BUTTON ─── */
 .login-btn {
   width: 100%;
-  padding: 14px;
-  font-size: 1rem;
+  padding: 12px;
+  font-size: 0.875rem;
   font-weight: 600;
   border: none;
-  background: #2563eb;
+  background: var(--primary);
   color: white;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .login-btn:hover:not(:disabled) {
-  background: #1e40af;
+  background: var(--primary-hover);
+  transform: scale(1.02);
 }
 
 .login-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* ERROR */
+/* ─── ERROR ─── */
 .login-error {
-  margin-top: 14px;
-  color: #dc2626;
-  font-size: 0.88rem;
+  margin-top: 12px;
+  color: var(--error);
+  font-size: 0.8125rem;
 }

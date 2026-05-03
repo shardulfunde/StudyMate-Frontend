@@ -1,39 +1,18 @@
-.cognimate-page {
-  min-height: 50vh;
-}
+.cognimate-page { min-height: 50vh; }
 
 .cognimate-hero {
-  background: linear-gradient(135deg, #0b0c0e 0%, #1a1d21 100%);
-  color: #eaf2ff;
-  padding: 6rem 2rem 4rem;
-  text-align: center;
-  border-radius: 12px;
-  margin: 2rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  background: #0f172a; color: #e2e8f0;
+  padding: 5rem 2rem 3.5rem; text-align: center;
+  border-radius: var(--radius-lg); margin: 1.5rem;
+  max-width: 800px; margin-left: auto; margin-right: auto;
+  box-shadow: var(--shadow-lg);
 }
 
 .cognimate-hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #007bff, #28a745);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;
+  letter-spacing: -0.02em; color: var(--primary-soft);
 }
 
-.cognimate-tagline {
-  font-size: 1.1rem;
-  color: rgba(234, 242, 255, 0.85);
-  margin-bottom: 2rem;
-}
-
-.cognimate-hint {
-  font-size: 1rem;
-  color: rgba(234, 242, 255, 0.7);
-}
-
-.cognimate-hint strong {
-  color: #a8c7fa;
-}
+.cognimate-tagline { font-size: 1rem; color: rgba(226,232,240,0.8); margin-bottom: 1.5rem; line-height: 1.5; }
+.cognimate-hint { font-size: 0.875rem; color: rgba(226,232,240,0.6); }
+.cognimate-hint strong { color: #93c5fd; }
