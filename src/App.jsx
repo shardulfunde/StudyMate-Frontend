@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import GooeyLoader from './components/ui/GooeyLoader';
 
@@ -18,6 +18,7 @@ import AcademicTeamPage from './pages/AcademicTeamPage';
 import PlatformApprovalsPage from './pages/PlatformApprovalsPage';
 import StudentDealsSurvey from './pages/StudentDealsSurvey';
 import NotFoundPage from './pages/NotFoundPage';
+import DMLabPage from './pages/DMLabPage';
 
 import { useCapabilities } from './context/CapabilityContext';
 import { useToast } from './context/ToastContext';
@@ -26,6 +27,17 @@ import { setApiHandlers } from './services/api';
 import { initAuthTokenSync, signInWithGoogle, signOut } from './services/auth';
 
 function App() {
+  const location = useLocation();
+
+  // Public routes that bypass auth entirely
+  if (location.pathname === '/dm') {
+    return <DMLabPage />;
+  }
+
+  return <AuthenticatedApp />;
+}
+
+function AuthenticatedApp() {
   const { user, loading, capabilities } = useCapabilities();
   const { showToast } = useToast();
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -136,3 +148,4 @@ function App() {
 }
 
 export default App;
+
