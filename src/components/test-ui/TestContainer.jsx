@@ -697,11 +697,13 @@ function TestContainerInner({ isOpen, onClose, title, autoStartOnOpen = false })
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
     document.documentElement.style.overflow = 'hidden';
+    document.body.classList.add('test-modal-open');
 
     return () => {
       document.body.style.overflow = prevBodyOverflow;
       document.body.style.touchAction = prevBodyTouchAction;
       document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.classList.remove('test-modal-open');
     };
   }, [isOpen]);
 

@@ -34,7 +34,8 @@
   gap: 12px;
 }
 
-body.pdf-viewer-open .navbar {
+body.pdf-viewer-open .navbar,
+body.test-modal-open .navbar {
   display: none;
 }
 
