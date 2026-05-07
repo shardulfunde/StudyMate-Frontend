@@ -335,11 +335,6 @@ function normalizeAxiosError(error, path) {
   return err;
 }
 
-/**
- * Axios-based test generation helper.
- * @param {TestGenerationRequest} payload
- * @returns {Promise<TestGenerationResponse>}
- */
 export async function generateTestAxios(payload) {
   const scopeType = payload?.scope_type;
   const requestBody = {
@@ -363,6 +358,173 @@ export async function generateTestAxios(payload) {
     return response.data;
   } catch (error) {
     throw normalizeAxiosError(error, '/tests/generate');
+  }
+}
+
+/**
+ * Native fetch based JSON-Lines streaming test generator.
+ * @param {TestGenerationRequest} payload
+ * @param {function(TestQuestion): void} onChunk Called when a new question arrives
+ * @param {function(Error): void} onError Called on error
+ */
+export async function streamTest(payload, onChunk, onError) {
+  const scopeType = payload?.scope_type;
+  const requestBody = {
+    scope_type: scopeType,
+    scope_id: payload?.scope_id,
+    number_of_questions: payload?.number_of_questions,
+    language: payload?.language,
+    difficulty: payload?.difficulty
+  };
+
+  if (typeof scopeType === 'string' && scopeType.startsWith('relevant')) {
+    requestBody.query = payload?.query;
+  }
+
+  const token = await getFreshIdToken();
+  if (!token) {
+    if (onError) onError(new Error('Not authenticated'));
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/tests/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw await parseError(response, '/tests/generate');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // Keep the last incomplete line in the buffer
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed) {
+          try {
+            const question = JSON.parse(trimmed);
+            if (question.question_text) {
+                onChunk(question);
+            }
+          } catch (e) {
+            console.warn('Failed to parse streaming line:', trimmed, e);
+          }
+        }
+      }
+    }
+    
+    // Process remaining buffer
+    if (buffer.trim()) {
+      try {
+        const question = JSON.parse(buffer.trim());
+        if (question.question_text) {
+            onChunk(question);
+        }
+      } catch (e) {
+        console.warn('Failed to parse final streaming line:', buffer.trim(), e);
+      }
+    }
+
+  } catch (error) {
+    if (onError) onError(error);
+  }
+}
+
+/**
+ * Native fetch based JSON-Lines streaming theory test generator.
+ * @param {TestGenerationRequest} payload
+ * @param {function(TheoryQuestion): void} onChunk Called when a new theory question arrives
+ * @param {function(Error): void} onError Called on error
+ */
+export async function streamTheoryTest(payload, onChunk, onError) {
+  const scopeType = payload?.scope_type;
+  const requestBody = {
+    scope_type: scopeType,
+    scope_id: payload?.scope_id,
+    number_of_questions: payload?.number_of_questions,
+    language: payload?.language,
+    difficulty: payload?.difficulty
+  };
+
+  if (typeof scopeType === 'string' && scopeType.startsWith('relevant')) {
+    requestBody.query = payload?.query;
+  }
+
+  const token = await getFreshIdToken();
+  if (!token) {
+    if (onError) onError(new Error('Not authenticated'));
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/tests/theorytest/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw await parseError(response, '/tests/theorytest/generate');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed) {
+          try {
+            const question = JSON.parse(trimmed);
+            if (question.question) {
+                onChunk(question);
+            }
+          } catch (e) {
+            console.warn('Failed to parse streaming line:', trimmed, e);
+          }
+        }
+      }
+    }
+    
+    if (buffer.trim()) {
+      try {
+        const question = JSON.parse(buffer.trim());
+        if (question.question) {
+            onChunk(question);
+        }
+      } catch (e) {
+        console.warn('Failed to parse final streaming line:', buffer.trim(), e);
+      }
+    }
+
+  } catch (error) {
+    if (onError) onError(error);
   }
 }
 

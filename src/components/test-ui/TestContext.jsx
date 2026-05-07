@@ -3,7 +3,9 @@ import {
   analyzeTestAxios,
   analyzeTheoryTestAxios,
   generateTestAxios,
-  generateTheoryTestAxios
+  generateTheoryTestAxios,
+  streamTest,
+  streamTheoryTest
 } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -63,7 +65,9 @@ function normalizeInitialConfig(initialConfig = {}) {
 
 function resolveQuestions(testResult, testType) {
   if (!testResult) return [];
-  if (testType === 'theory') return testResult?.theory_test?.questions || [];
+  if (testType === 'theory') {
+    return testResult?.theory_test?.questions || testResult?.questions || [];
+  }
   return testResult?.questions || [];
 }
 
@@ -100,6 +104,7 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource', init
     startError: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [generationStageIndex, setGenerationStageIndex] = useState(0);
 
   const isTheoryTest = activeTestType === 'theory';
@@ -207,21 +212,39 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource', init
     setAnalysis({ data: null, loading: false, error: '', visible: false });
 
     try {
-      const generated = requestedType === 'theory'
-        ? await generateTheoryTestAxios(payload)
-        : await generateTestAxios(payload);
-
-      const generatedQuestions = resolveQuestions(generated, requestedType);
-
       setActiveTestType(requestedType);
-      setTestResult(generated);
+      setTestResult({ questions: [] });
       setAnswers({});
       setCurrentQuestionIndex(0);
       setQuestionMotionKey(0);
       setQuestionMotionDirection('next');
       setSubmitted(false);
       setScore(DEFAULT_SCORE);
-      setTimerSeconds(getInitialTimer(generatedQuestions.length));
+      setTimerSeconds(getInitialTimer(payload.number_of_questions));
+
+      setIsStreaming(true);
+      await new Promise((resolve, reject) => {
+        let firstChunkReceived = false;
+        
+        const streamFn = requestedType === 'theory' ? streamTheoryTest : streamTest;
+        
+        streamFn(
+          payload,
+          (newQuestion) => {
+            if (!firstChunkReceived) {
+              setIsGenerating(false);
+              firstChunkReceived = true;
+            }
+            setTestResult((prev) => {
+              const currentQuestions = prev?.questions || [];
+              return { ...prev, questions: [...currentQuestions, newQuestion] };
+            });
+          },
+          (error) => reject(error)
+        ).then(resolve);
+      });
+      setIsStreaming(false);
+
       setGenerationStageIndex(GENERATION_STAGES.length - 1);
 
       const previousCount = Number(window.localStorage.getItem(MOMENTUM_STORAGE_KEY) || 0);
@@ -435,6 +458,7 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource', init
     analysis,
     ui,
     isGenerating,
+    isStreaming,
     generationStageIndex,
     generationStageText: GENERATION_STAGES[generationStageIndex] || GENERATION_STAGES[0],
     isAiBusy,

@@ -527,7 +527,8 @@ function TestBody({ onBackSubject, autoStartOnOpen = false }) {
     isAiBusy,
     resetTestState,
     getCorrectAnswerIndex,
-    startTest
+    startTest,
+    isStreaming
   } = useTestContext();
   const questionRefs = useRef([]);
   const title = isTheoryTest ? 'Theory Test' : 'MCQ Test';
@@ -625,6 +626,24 @@ function TestBody({ onBackSubject, autoStartOnOpen = false }) {
               )}
             </section>
           ))}
+
+          {isStreaming && (
+            <section className="animate-pulse space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="h-6 w-24 rounded bg-slate-200"></div>
+                <div className="h-4 flex-1 rounded bg-slate-100"></div>
+              </div>
+              <div className="space-y-3 pt-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex h-14 items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4">
+                    <div className="h-5 w-5 rounded-full border-2 border-slate-200"></div>
+                    <div className="h-4 flex-1 rounded bg-slate-200"></div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
         </div>
 
       </div>
