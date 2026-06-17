@@ -353,15 +353,30 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource', init
     setAnalysis({ data: null, loading: true, error: '', visible: true });
 
     try {
-      const response = submittedType === 'theory'
-        ? await analyzeTheoryTestAxios({
-            theory_test: submittedResult,
-            student_answer: buildTheoryStudentAnswers()
-          })
-        : await analyzeTestAxios({
-            test: submittedResult,
-            student_answer: buildMcqStudentAnswers()
-          });
+      let response;
+      if (submittedType === 'theory') {
+        response = await analyzeTheoryTestAxios({
+          theory_test: {
+            theory_test: {
+              difficulty: testConfig.difficulty,
+              language: testConfig.language,
+              questions: submittedResult?.questions || []
+            },
+            random_chunks: submittedResult?.random_chunks || []
+          },
+          student_answer: buildTheoryStudentAnswers()
+        });
+      } else {
+        response = await analyzeTestAxios({
+          test: {
+            topic: testConfig.query || 'General',
+            language: testConfig.language,
+            difficulty: testConfig.difficulty,
+            questions: submittedResult?.questions || []
+          },
+          student_answer: buildMcqStudentAnswers()
+        });
+      }
 
       setAnalysis({ data: response, loading: false, error: '', visible: true });
 
@@ -373,7 +388,7 @@ export function TestProvider({ children, scopeId, scopeTarget = 'resource', init
       setAnalysis({ data: null, loading: false, error: message, visible: true });
       showToast(message, 'error');
     }
-  }, [buildMcqStudentAnswers, buildTheoryStudentAnswers, showToast, updateTheoryScoreFromAnalysis]);
+  }, [buildMcqStudentAnswers, buildTheoryStudentAnswers, showToast, testConfig, updateTheoryScoreFromAnalysis]);
 
   const confirmSubmit = useCallback(async () => {
     if (!questions.length) return;

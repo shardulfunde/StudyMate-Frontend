@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BackgroundPlus from '../components/ui/BackgroundPlus';
-import NavHeader from '../components/ui/NavHeader';
+import GooeyText from '../components/ui/GooeyText';
+import SparklesText from '../components/ui/SparklesText';
 import Shuffle from '../components/ui/Shuffle';
 import BounceCards from '../components/ui/BounceCards';
+import AnimatedList from '../components/ui/AnimatedList';
 import Waves from '../components/ui/Waves';
 import './LandingPage.css';
 
@@ -72,6 +74,27 @@ const navItems = [
   { label: 'Sign In', href: '#signin' },
 ];
 
+const backedByCards = [
+  {
+    id: 'microsoft',
+    name: 'Microsoft',
+    stat: '$100,000',
+    statSub: '≈ ₹94.5 Lakh',
+    detail: 'Azure cloud credits via Microsoft for Startups Founders Hub',
+    partnerLabel: 'In partnership with',
+    partnerName: 'Deel Ventures'
+  },
+  {
+    id: 'zerobase',
+    name: 'ZeroBase',
+    stat: 'Accepted',
+    statSub: null,
+    detail: 'Selected for ZeroBase Startup School — a competitive program for early-stage founders',
+    partnerLabel: 'Program',
+    partnerName: 'Startup School'
+  }
+];
+
 const bounceImages = [
   'https://images.unsplash.com/photo-1513258496099-48168024aec0?w=500&q=80',
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500&q=80',
@@ -112,9 +135,16 @@ export default function LandingPage({
   isSigningIn = false,
   authError = ''
 }) {
+  const [showMaintenancePopup, setShowMaintenancePopup] = useState(false);
+
+  const handleSignInClick = () => {
+    onGoogleSignIn();
+    setShowMaintenancePopup(true);
+  };
+
   const handleNavClick = (item) => {
     if (item.href === '#signin') {
-      onGoogleSignIn();
+      handleSignInClick();
     }
   };
 
@@ -139,11 +169,7 @@ export default function LandingPage({
         className="landing-bg-pattern"
       />
 
-      {/* Animated pill navbar */}
-      <NavHeader
-        items={navItems}
-        onItemClick={handleNavClick}
-      />
+
 
       <main className="landing-main">
         {/* ── HERO ── */}
@@ -153,34 +179,29 @@ export default function LandingPage({
               <span className="landing-kicker">✨ AI-Powered Study Workspace</span>
             </div>
 
-            <Shuffle
-              text="StudyMate"
-              tag="h1"
-              className="hero-shuffle-title"
-              textAlign="left"
-              shuffleDirection="right"
-              duration={0.4}
-              animationMode="evenodd"
-              shuffleTimes={1}
-              ease="power3.out"
-              stagger={0.04}
-              threshold={0.05}
-              triggerOnce={true}
-              triggerOnHover={true}
-              respectReducedMotion={true}
+            <SparklesText
+              text="StudyMate AI"
+              className="hero-sparkle-title"
+              sparklesCount={5}
+              colors={{ first: '#2563eb', second: '#7c3aed' }}
               style={{
                 fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
                 fontWeight: 800,
                 letterSpacing: '-0.03em',
-                color: '#0f172a',
                 fontFamily: "'Inter', system-ui, sans-serif"
               }}
             />
 
-            <p className="hero-subtitle">
-              Learn with structure.<br />
-              <span className="text-gradient">Practice with confidence.</span>
-            </p>
+            <div className="hero-subtitle">
+              Your AI workspace for
+              <GooeyText
+                texts={['Smart Revision', 'PYQ Analysis', 'AI Notes', 'Exam Prep', 'Practice Tests']}
+                morphTime={1}
+                cooldownTime={1}
+                className="hero-gooey-wrap"
+                textClassName="hero-gooey-text"
+              />
+            </div>
 
             <p className="landing-lead">
               Notes, previous year papers, AI guidance, and test analysis — one focused learning flow for college students.
@@ -188,7 +209,7 @@ export default function LandingPage({
 
             <div className="landing-hero-actions">
               <SignInButton
-                onGoogleSignIn={onGoogleSignIn}
+                onGoogleSignIn={handleSignInClick}
                 isSigningIn={isSigningIn}
               />
               <span className="landing-secondary-note">App Coming Soon</span>
@@ -198,12 +219,11 @@ export default function LandingPage({
               Built for real study workflows: discover, practice, and improve in one place.
             </p>
 
-            {authError && <p className="landing-error">{authError}</p>}
           </div>
 
           <aside className="landing-hero-panel" aria-label="StudyMate preview cards">
             <BounceCards
-              className="landing-bounce-cards"
+              className="hero-bounce-cards landing-bounce-cards"
               images={bounceImages}
               containerWidth={500}
               containerHeight={280}
@@ -226,26 +246,22 @@ export default function LandingPage({
             <p className="section-subtitle">Core capabilities</p>
             <h2>Built for daily academic execution</h2>
           </div>
-          <div className="landing-feature-grid">
-            {featureCards.map((card, index) => (
-              <article key={card.title} className="landing-feature-card glass-card">
-                <div className="landing-feature-image-wrap">
-                  <img
-                    src={featureCardImages[index]}
-                    alt=""
-                    className="landing-feature-image"
-                    loading="lazy"
-                  />
-                  <span className="landing-feature-icon">{card.icon}</span>
+          <AnimatedList
+            items={featureCards.map((card) => (
+              <div className="feature-list-item" key={card.title}>
+                <span className="feature-list-icon">{card.icon}</span>
+                <div className="feature-list-content">
+                  <span className="feature-list-tag">{card.tag}</span>
+                  <h3 className="feature-list-title">{card.title}</h3>
+                  <p className="feature-list-desc">{card.description}</p>
                 </div>
-                <div className="landing-feature-content">
-                  <span className="landing-feature-tag">{card.tag}</span>
-                  <h3>{card.title}</h3>
-                  <p>{card.description}</p>
-                </div>
-              </article>
+              </div>
             ))}
-          </div>
+            showGradients={true}
+            enableArrowNavigation={true}
+            displayScrollbar={false}
+            className="features-animated-list"
+          />
         </section>
 
         {/* ── WORKFLOW ── */}
@@ -295,16 +311,50 @@ export default function LandingPage({
             />
             <p>Use your Google account to access your personalized learning environment.</p>
             <SignInButton
-              onGoogleSignIn={onGoogleSignIn}
+              onGoogleSignIn={handleSignInClick}
               isSigningIn={isSigningIn}
               className="landing-signin-btn-wide"
             />
-            {authError && <p className="landing-error">{authError}</p>}
           </div>
         </section>
       </main>
 
       {/* ── FOOTER ── */}
+      {showMaintenancePopup && authError && (
+        <div
+          className="landing-popup-backdrop"
+          role="presentation"
+          onClick={() => setShowMaintenancePopup(false)}
+        >
+          <div
+            className="landing-popup"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="landing-popup-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="landing-popup-close"
+              aria-label="Close"
+              onClick={() => setShowMaintenancePopup(false)}
+            >
+              X
+            </button>
+            <span className="landing-popup-kicker">Temporary downtime</span>
+            <h2 id="landing-popup-title">StudyMate is being rebuilt for scale</h2>
+            <p>{authError}</p>
+            <button
+              type="button"
+              className="landing-popup-action"
+              onClick={() => setShowMaintenancePopup(false)}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
       <footer className="landing-footer">
         <div className="landing-shell landing-footer-inner">
           <p className="footer-brand"><span className="brand-icon">📚</span> StudyMate</p>

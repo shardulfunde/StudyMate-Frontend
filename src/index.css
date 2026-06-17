@@ -168,3 +168,110 @@ select:disabled {
   color: var(--error);
   font-size: 0.8125rem;
 }
+
+/* Temporary backend migration screen */
+.maintenance-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(37, 99, 235, 0.14), transparent 34%),
+    radial-gradient(circle at 82% 72%, rgba(251, 58, 93, 0.12), transparent 30%),
+    linear-gradient(135deg, #f8fafc 0%, #eef6ff 52%, #f8fafc 100%);
+}
+
+.maintenance-card {
+  width: min(620px, 100%);
+  padding: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px);
+}
+
+.maintenance-kicker {
+  display: inline-flex;
+  margin-bottom: 14px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.maintenance-card h1 {
+  margin: 0 0 14px;
+  color: var(--text-primary);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.maintenance-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.maintenance-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.maintenance-primary-btn,
+.maintenance-secondary-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.maintenance-primary-btn {
+  border: none;
+  background: var(--primary);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+}
+
+.maintenance-primary-btn:hover {
+  background: #2d6ff2;
+}
+
+.maintenance-secondary-link {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-primary);
+}
+
+.maintenance-secondary-link:hover {
+  border-color: var(--border-hover);
+}
+
+@media (max-width: 560px) {
+  .maintenance-card {
+    padding: 28px 20px;
+  }
+
+  .maintenance-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

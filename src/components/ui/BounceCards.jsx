@@ -5,6 +5,7 @@ import './BounceCards.css';
 export default function BounceCards({
   className = '',
   images = [],
+  children,
   containerWidth = 400,
   containerHeight = 400,
   animationDelay = 0.5,
@@ -17,9 +18,15 @@ export default function BounceCards({
     'rotate(-10deg) translate(85px)',
     'rotate(2deg) translate(170px)'
   ],
+  // When the container is hovered, cards animate to these transforms (spread apart)
+  hoverTransformStyles = null,
   enableHover = true
 }) {
   const containerRef = useRef(null);
+
+  const items = children
+    ? (Array.isArray(children) ? children : [children])
+    : images;
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -57,12 +64,30 @@ export default function BounceCards({
     return baseTransform === 'none' ? `translate(${offsetX}px)` : `${baseTransform} translate(${offsetX}px)`;
   };
 
-  const pushSiblings = (hoveredIdx) => {
-    if (!enableHover || !containerRef.current) return;
+  const spreadCards = () => {
+    if (!enableHover || !containerRef.current || !hoverTransformStyles) return;
 
     const q = gsap.utils.selector(containerRef);
 
-    images.forEach((_, i) => {
+    items.forEach((_, i) => {
+      const target = q(`.bounce-card-${i}`);
+      gsap.killTweensOf(target);
+      gsap.to(target, {
+        transform: hoverTransformStyles[i] || 'none',
+        duration: 0.5,
+        ease: 'back.out(1.7)',
+        delay: i * 0.04,
+        overwrite: 'auto'
+      });
+    });
+  };
+
+  const pushSiblings = (hoveredIdx) => {
+    if (!enableHover || !containerRef.current || hoverTransformStyles) return;
+
+    const q = gsap.utils.selector(containerRef);
+
+    items.forEach((_, i) => {
       const target = q(`.bounce-card-${i}`);
       const baseTransform = transformStyles[i] || 'none';
 
@@ -88,22 +113,34 @@ export default function BounceCards({
     });
   };
 
-  const resetSiblings = () => {
+  const resetCards = () => {
     if (!enableHover || !containerRef.current) return;
 
     const q = gsap.utils.selector(containerRef);
 
-    images.forEach((_, i) => {
+    items.forEach((_, i) => {
       const target = q(`.bounce-card-${i}`);
       gsap.killTweensOf(target);
       gsap.to(target, {
         transform: transformStyles[i] || 'none',
-        duration: 0.4,
-        ease: 'back.out(1.4)',
+        duration: 0.5,
+        ease: 'back.out(1.7)',
         overwrite: 'auto'
       });
     });
   };
+
+  const renderCard = (content, idx, isChild) => (
+    <div
+      key={idx}
+      className={`bounce-card bounce-card-${idx}`}
+      style={{ transform: transformStyles[idx] ?? 'none' }}
+      onMouseEnter={() => pushSiblings(idx)}
+      onMouseLeave={resetCards}
+    >
+      {isChild ? content : <img className="bounce-card-image" src={content} alt={`Card ${idx + 1}`} />}
+    </div>
+  );
 
   return (
     <div
@@ -113,18 +150,13 @@ export default function BounceCards({
         width: containerWidth,
         height: containerHeight
       }}
+      onMouseEnter={spreadCards}
+      onMouseLeave={resetCards}
     >
-      {images.map((src, idx) => (
-        <div
-          key={src}
-          className={`bounce-card bounce-card-${idx}`}
-          style={{ transform: transformStyles[idx] ?? 'none' }}
-          onMouseEnter={() => pushSiblings(idx)}
-          onMouseLeave={resetSiblings}
-        >
-          <img className="bounce-card-image" src={src} alt={`StudyMate preview ${idx + 1}`} />
-        </div>
-      ))}
+      {children
+        ? items.map((child, idx) => renderCard(child, idx, true))
+        : images.map((src, idx) => renderCard(src, idx, false))
+      }
     </div>
   );
 }

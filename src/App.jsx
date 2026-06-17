@@ -24,7 +24,12 @@ import { useCapabilities } from './context/CapabilityContext';
 import { useToast } from './context/ToastContext';
 import { buildPermissions } from './utils/permissions';
 import { setApiHandlers } from './services/api';
-import { initAuthTokenSync, signInWithGoogle, signOut } from './services/auth';
+import { initAuthTokenSync, signOut } from './services/auth';
+
+const BACKEND_MIGRATION_NOTICE =
+  'We are completely reimagining our AI features and moving StudyMate to a scalable Microsoft cloud setup. Our previous AWS credits ran out, but we have received $100,000 in Microsoft for Startups cloud credits, so the backend is being rebuilt for better reliability. Our team, which currently consists of one person only, is working hard on the issue. Sign-in will reopen once the migration is ready.';
+
+const MAINTENANCE_MODE = true;
 
 function App() {
   const location = useLocation();
@@ -78,15 +83,7 @@ function AuthenticatedApp() {
 
   const handleGoogleSignIn = useCallback(async () => {
     if (isSigningIn) return;
-    setIsSigningIn(true);
-    setAuthError('');
-
-    try {
-      await signInWithGoogle();
-    } catch {
-      setAuthError('Sign-in failed. Try again.');
-      setIsSigningIn(false);
-    }
+    setAuthError(BACKEND_MIGRATION_NOTICE);
   }, [isSigningIn]);
 
   if (loading) {
@@ -110,6 +107,10 @@ function AuthenticatedApp() {
         authError={authError}
       />
     );
+  }
+
+  if (MAINTENANCE_MODE) {
+    return <MaintenancePage onSignOut={signOut} />;
   }
 
   return (
@@ -144,6 +145,31 @@ function AuthenticatedApp() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>
+  );
+}
+
+function MaintenancePage({ onSignOut }) {
+  return (
+    <main className="maintenance-page">
+      <section className="maintenance-card" aria-labelledby="maintenance-title">
+        <span className="maintenance-kicker">Temporary downtime</span>
+        <h1 id="maintenance-title">StudyMate is being rebuilt for scale</h1>
+        <p>{BACKEND_MIGRATION_NOTICE}</p>
+        <div className="maintenance-actions">
+          <button type="button" className="maintenance-primary-btn" onClick={onSignOut}>
+            Sign out
+          </button>
+          <a
+            className="maintenance-secondary-link"
+            href="https://github.com/shardulfunde/StudyMate-AI"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View GitHub
+          </a>
+        </div>
+      </section>
+    </main>
   );
 }
 

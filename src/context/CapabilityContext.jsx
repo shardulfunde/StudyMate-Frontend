@@ -55,7 +55,9 @@ export function CapabilityProvider({ children }) {
       }
 
       try {
-        // Fetch capabilities from your backend
+        // Wait for the Firebase ID token to be ready before calling the API
+        await firebaseUser.getIdToken(true);
+
         const data = await api.get('/me/capabilities');
         
         console.log("Capabilities Loaded:", data); // DEBUG LOG
@@ -69,7 +71,6 @@ export function CapabilityProvider({ children }) {
         });
       } catch (err) {
         console.error("Failed to load capabilities:", err);
-        // Default to no permissions on error
         setCapabilities({
           isPlatformSuperadmin: false,
           managedColleges: [],
