@@ -1,0 +1,5 @@
+{
+  "Description": "Domain ownership verification file for Microsoft 365 - place in the website root",
+  "Domain": "studymateai.com",
+  "Id": "ea3d0784-4ce6-4426-a5e5-7dcb7306ef3b"
+}

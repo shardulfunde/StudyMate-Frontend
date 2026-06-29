@@ -92,6 +92,7 @@
 .hero-sparkle-title {
   margin-bottom: 10px;
   line-height: 1.1;
+  max-width: 100%;
 }
 
 .sparkles-text-inner {
@@ -119,7 +120,7 @@
   font-weight: 600;
   color: var(--text-secondary);
   margin: 0 0 16px;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   animation: heroFadeUp 0.7s 0.15s ease-out both;
 }
 
@@ -153,7 +154,7 @@
 .hero-gooey-text {
   font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -276,7 +277,7 @@
   color: var(--text-primary);
   font-size: clamp(1.35rem, 3vw, 1.75rem);
   line-height: 1.2;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .landing-popup p {
@@ -362,7 +363,7 @@
 .landing-preview-caption strong {
   color: var(--text-primary);
   font-size: 0.95rem;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 /* Hero backer logo cards — inside bounce-card wrapper */
@@ -458,7 +459,7 @@
   font-size: 1.125rem;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 /* Subtle "Backed by" badge on default face */
@@ -517,7 +518,7 @@
 .backer-info-stat {
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   line-height: 1.1;
   background: linear-gradient(135deg, #0f172a 30%, #2563eb);
   -webkit-background-clip: text;
@@ -647,7 +648,7 @@
 .landing-section-head h2 {
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   line-height: 1.2;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--text-primary);
 }
 

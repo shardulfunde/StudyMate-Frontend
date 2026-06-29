@@ -185,9 +185,9 @@ export default function LandingPage({
               sparklesCount={5}
               colors={{ first: '#2563eb', second: '#7c3aed' }}
               style={{
-                fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+                fontSize: 'clamp(2.1rem, 12vw, 4.5rem)',
                 fontWeight: 800,
-                letterSpacing: '-0.03em',
+                letterSpacing: '0',
                 fontFamily: "'Inter', system-ui, sans-serif"
               }}
             />
@@ -304,7 +304,7 @@ export default function LandingPage({
               style={{
                 fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
                 fontWeight: 700,
-                letterSpacing: '-0.02em',
+                letterSpacing: '0',
                 color: '#ffffff',
                 fontFamily: "'Inter', system-ui, sans-serif"
               }}
